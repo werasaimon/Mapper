@@ -15,6 +15,8 @@ using GMap.NET.WindowsForms.Markers;
 
 using System.Data.SQLite;
 
+using Newtonsoft.Json;
+
 namespace WindowsFormsAppMapa
 {
 
@@ -24,7 +26,8 @@ namespace WindowsFormsAppMapa
 
 public partial class FormMapa : Form
 {
-
+        private bool m_IsUser;
+        private bool m_IsAdministrator;
 
         Dictionary<String, InfoPolygon> HashElements = new Dictionary<String, InfoPolygon>();
 
@@ -33,6 +36,7 @@ public partial class FormMapa : Form
         InfoPolygon m_SelectedInfoPolygon;
 
         private FormForVariables m_FormInterfaceVariables;
+        private FormUser m_FormAdministrator;
 
         private List<PointLatLng> gpolypoints = new List<PointLatLng>();
         private List<PointLatLng> gedgepoints = new List<PointLatLng>();
@@ -91,8 +95,9 @@ public partial class FormMapa : Form
         private void FormMapa_Load(object sender, EventArgs e)
         {
             Initilization_mapa(gMapa as GMapControl);
-            DB = new SQLiteConnection("Data Source=database.db; Version=3");
+            DB = new SQLiteConnection("Data Source=../../database/DB.db; Version=3");
             DB.Open();
+            LoadInformationDB();
         }
 
         private void gMapa_MouseDown(object sender, MouseEventArgs e)
@@ -146,7 +151,7 @@ public partial class FormMapa : Form
                     /**/
                     if(Distance < 0.3 && gpolypoints.Count >= 3)
                     {
-                        m_FormInterfaceVariables = new FormForVariables(HashElements);
+                        m_FormInterfaceVariables = new FormForVariables(HashElements,false);
                         m_FormInterfaceVariables.ShowDialog(this);
 
                         //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
@@ -192,7 +197,7 @@ public partial class FormMapa : Form
 
                             HashElements[plygone.m_toName] = plygone;
 
-
+                            SaveInfoInDB(plygone);
 
                             Console.WriteLine(plygone.m_toName);
                             this.listBoxElements.Items.Add(plygone.m_toName);
@@ -315,6 +320,7 @@ public partial class FormMapa : Form
 
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            DeleteInfoInDB(m_SelectedInfoPolygon);
             m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Polygons.Remove(m_SelectedInfoPolygon);
             m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
             HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
@@ -333,7 +339,7 @@ public partial class FormMapa : Form
 
         private void ModifyToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon,HashElements);
+            m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements , true);
             m_FormInterfaceVariables.ShowDialog(this);
 
             //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
@@ -342,10 +348,10 @@ public partial class FormMapa : Form
                 Console.WriteLine("Cancel |||| ");
                 m_FormInterfaceVariables.Close();
             }
-            else
+            else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
             {
                 /**/
-
+                DeleteInfoInDB(m_SelectedInfoPolygon);
                 m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Polygons.Remove(m_SelectedInfoPolygon);
                 m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
                 HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
@@ -390,15 +396,16 @@ public partial class FormMapa : Form
                 m_OverlaysPoligons[typeIndex].Polygons.Add(plygone);
 
                 HashElements[plygone.m_toName] = plygone;
-
                 gMapa.ReloadMap();
 
                 //m_SelectedInfoPolygon = plygone;
+                SaveInfoInDB(plygone);
 
                 m_IsCreate = false;
                 this.button5.BackColor = Color.White;
                 /**/
             }
+     
 
             this.contextMenuStrip1.Close();
         }
@@ -472,6 +479,139 @@ public partial class FormMapa : Form
                              "Group : " + ABC[_poly.m_Type] + "\n" +
                              "Depth : " + _poly.m_Depth.ToString() + "\n";
         }
+
+        private void FormMapa_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DB.Close();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+           
+            if(m_IsUser == false)
+            {
+                m_FormAdministrator = new FormUser(DB);
+                m_FormAdministrator.ShowDialog(this);
+
+                if(m_FormAdministrator.IsVariablee)
+                {
+                    m_IsAdministrator = m_FormAdministrator.IsAdministrator;
+                    m_IsUser = true;
+                    buttonUser.Text = "Connect User";
+                }
+            }
+            else 
+            {
+                m_IsAdministrator = false;
+                m_IsUser = false;
+                buttonUser.Text = "Disconnect User";
+            }
+
+         
+        }
+
+        private void DeleteInfoInDB(InfoPolygon _infoPoly)
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            String name = _infoPoly.m_toName;
+            CMD.CommandText = "DELETE FROM Information WHERE Name='" + name + "';";
+            CMD.ExecuteNonQuery();
+            CMD.Dispose();
+        }
+
+
+        private void SaveInfoInDB(InfoPolygon _infoPoly)
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            CMD.CommandText = "insert or replace into Information(Name,Depth,Type,SizePoints,Points,Origin) " +
+                              "values(@name,@depth,@type,@sizePoints,@points,@origin)";
+
+            CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoPoly.m_toName;
+            CMD.Parameters.Add("@depth", System.Data.DbType.Double).Value = _infoPoly.m_Depth;
+            CMD.Parameters.Add("@type", System.Data.DbType.Int32).Value = _infoPoly.m_Type;
+            CMD.Parameters.Add("@sizePoints", System.Data.DbType.Int32).Value = _infoPoly.Points.Count;
+
+
+            String jsonPoints = JsonConvert.SerializeObject(_infoPoly.Points);
+            CMD.Parameters.Add("@points", System.Data.DbType.String).Value = jsonPoints;
+
+            String jsonOrigin = JsonConvert.SerializeObject(_infoPoly.Origin);
+            CMD.Parameters.Add("@origin", System.Data.DbType.String).Value = jsonOrigin;
+
+            CMD.ExecuteNonQuery();
+        }
+
+        private void LoadInformationDB()
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            CMD.CommandText = "select * from Information";
+            SQLiteDataReader SQL = CMD.ExecuteReader();
+            if (SQL.HasRows)
+            {
+                while (SQL.Read())
+                {
+                    String name = SQL["Name"].ToString();
+                    int depth = 0;
+                    int type = 0;
+                    int size = 0;
+                    Int32.TryParse(SQL["Depth"].ToString(), out depth);
+                    Int32.TryParse(SQL["Type"].ToString(), out type);
+                    Int32.TryParse(SQL["SizePoints"].ToString(), out size);
+
+
+                    System.Console.WriteLine("Name: " + name.ToString());
+                    System.Console.WriteLine("Depth:" + depth.ToString());
+                    System.Console.WriteLine("Type: " + type.ToString());
+                    System.Console.WriteLine("Size: " + size.ToString());
+
+                    string jsonOrigin = SQL["Origin"].ToString();
+                    PointLatLng desOrigin = JsonConvert.DeserializeObject<PointLatLng>(jsonOrigin);
+                    System.Console.WriteLine(jsonOrigin.ToString());
+
+                    string jsonPoints = SQL["Points"].ToString();
+                    List<PointLatLng> desPoints = JsonConvert.DeserializeObject<List<PointLatLng>>(jsonPoints);
+                    foreach (var it in desPoints)
+                    {
+                        System.Console.WriteLine(it);
+                    }
+
+
+                    if (!HashElements.ContainsKey(name))
+                    {
+                        //HashElements.Remove(name);
+                        /**/
+
+                        InfoPolygon plygone = new InfoPolygon(desPoints, name);
+
+                        int typeIndex = type;
+
+                        Color[] colors = { Color.Red, Color.Green, Color.Blue };
+
+                        plygone.Fill = new SolidBrush(Color.FromArgb(depth, colors[typeIndex]));
+                        plygone.Stroke = new Pen(Color.Black, 1);
+
+                        plygone.IsHitTestVisible = true;
+                        plygone.m_toName = name;
+                        plygone.m_Type = type;
+                        plygone.m_Depth = depth;
+
+                        Console.WriteLine(plygone.m_toName);
+                        this.listBoxElements.Items.Add(plygone.m_toName);
+
+                        plygone.m_Marker = new GMarkerGoogle(desOrigin, ImageMarkers[typeIndex]);
+                        m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                        m_OverlaysPoligons[typeIndex].Polygons.Add(plygone);
+
+                        HashElements[plygone.m_toName] = plygone;
+                        gMapa.ReloadMap();
+
+                        /**/
+                    }
+                }
+            }
+        }
+
+    
     }
 
 

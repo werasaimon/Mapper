@@ -22,6 +22,7 @@
             this.ModifyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.buttonUser = new System.Windows.Forms.Button();
             this.listBoxElements = new System.Windows.Forms.ListBox();
             this.labelInfo = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -61,7 +62,7 @@
             this.gMapa.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapa.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapa.ShowTileGridLines = false;
-            this.gMapa.Size = new System.Drawing.Size(607, 396);
+            this.gMapa.Size = new System.Drawing.Size(713, 396);
             this.gMapa.TabIndex = 0;
             this.gMapa.Zoom = 0D;
             this.gMapa.OnPolygonClick += new GMap.NET.WindowsForms.PolygonClick(this.gMapa_OnPolygonClick);
@@ -143,6 +144,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.buttonUser);
             this.panel1.Controls.Add(this.checkBoxLayer1);
             this.panel1.Controls.Add(this.checkBoxLayer0);
             this.panel1.Controls.Add(this.button5);
@@ -150,8 +152,18 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(800, 54);
+            this.panel1.Size = new System.Drawing.Size(940, 54);
             this.panel1.TabIndex = 10;
+            // 
+            // buttonUser
+            // 
+            this.buttonUser.Location = new System.Drawing.Point(458, 19);
+            this.buttonUser.Name = "buttonUser";
+            this.buttonUser.Size = new System.Drawing.Size(171, 23);
+            this.buttonUser.TabIndex = 13;
+            this.buttonUser.Text = "User";
+            this.buttonUser.UseVisualStyleBackColor = true;
+            this.buttonUser.Click += new System.EventHandler(this.button4_Click);
             // 
             // listBoxElements
             // 
@@ -161,7 +173,7 @@
             this.listBoxElements.ItemHeight = 25;
             this.listBoxElements.Location = new System.Drawing.Point(0, 0);
             this.listBoxElements.Name = "listBoxElements";
-            this.listBoxElements.Size = new System.Drawing.Size(189, 198);
+            this.listBoxElements.Size = new System.Drawing.Size(223, 198);
             this.listBoxElements.TabIndex = 0;
             this.listBoxElements.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxElements_DrawItem);
             this.listBoxElements.SelectedIndexChanged += new System.EventHandler(this.listBoxElements_SelectedIndexChanged);
@@ -173,9 +185,9 @@
             this.labelInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.labelInfo.Location = new System.Drawing.Point(0, 0);
             this.labelInfo.Name = "labelInfo";
-            this.labelInfo.Size = new System.Drawing.Size(83, 36);
+            this.labelInfo.Size = new System.Drawing.Size(89, 36);
             this.labelInfo.TabIndex = 1;
-            this.labelInfo.Text = "label";
+            this.labelInfo.Text = "INFO";
             // 
             // splitContainer1
             // 
@@ -191,7 +203,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.labelInfo);
-            this.splitContainer1.Size = new System.Drawing.Size(189, 396);
+            this.splitContainer1.Size = new System.Drawing.Size(223, 396);
             this.splitContainer1.SplitterDistance = 198;
             this.splitContainer1.TabIndex = 11;
             // 
@@ -208,19 +220,20 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer1);
-            this.splitContainer2.Size = new System.Drawing.Size(800, 396);
-            this.splitContainer2.SplitterDistance = 607;
+            this.splitContainer2.Size = new System.Drawing.Size(940, 396);
+            this.splitContainer2.SplitterDistance = 713;
             this.splitContainer2.TabIndex = 12;
             // 
             // FormMapa
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(940, 450);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.panel1);
             this.Name = "FormMapa";
             this.Text = "Form2";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMapa_FormClosing);
             this.Load += new System.EventHandler(this.FormMapa_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -254,5 +267,6 @@
         private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.Button buttonUser;
     }
 }
