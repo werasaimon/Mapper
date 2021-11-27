@@ -17,7 +17,7 @@ namespace WindowsFormsAppMapa
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMapa());
+            Application.Run(new FormStartProgram());
         }
     }
 }

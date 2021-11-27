@@ -21,15 +21,51 @@ namespace WindowsFormsAppMapa
 {
 
 
+    /**
+    public class CustomCheckedListBox : CheckedListBox
+    {
+        public CustomCheckedListBox()
+        {
+            DoubleBuffered = true;
+        }
+        protected override void OnDrawItem(DrawItemEventArgs e)
+        {
+            Size checkSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, System.Windows.Forms.VisualStyles.CheckBoxState.MixedNormal);
+            int dx = (e.Bounds.Height - checkSize.Width) / 2;
+            e.DrawBackground();
+            bool isChecked = GetItemChecked(e.Index);//For some reason e.State doesn't work so we have to do this instead.
+            CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(dx, e.Bounds.Top + dx), isChecked ? System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal : System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
+            using (StringFormat sf = new StringFormat { LineAlignment = StringAlignment.Center })
+            {
+                using (Brush brush = new SolidBrush(isChecked ? CheckedItemColor : ForeColor))
+                {
+                    e.Graphics.DrawString(Items[e.Index].ToString(), Font, brush, new Rectangle(e.Bounds.Height, e.Bounds.Top, e.Bounds.Width - e.Bounds.Height, e.Bounds.Height), sf);
+                }
+            }
+        }
+        Color checkedItemColor = Color.Green;
+        public Color CheckedItemColor
+        {
+            get { return checkedItemColor; }
+            set
+            {
+                checkedItemColor = value;
+                Invalidate();
+            }
+        }
+    }
+    /**/
 
 
-
-public partial class FormMapa : Form
+    public partial class FormMapa : Form
 {
         private bool m_IsUser;
         private bool m_IsAdministrator;
+        private String m_Username;
 
         Dictionary<String, InfoPolygon> HashElements = new Dictionary<String, InfoPolygon>();
+        Dictionary<String, GMapOverlay> GroundOverlays = new Dictionary<String, GMapOverlay>();
+        Dictionary<String, Color> m_HashColors = new Dictionary<String, Color>();
 
         private bool m_IsCreate;
 
@@ -43,19 +79,54 @@ public partial class FormMapa : Form
 
         private SQLiteConnection DB;
         private GMapOverlay OverlayMarkers = new GMapOverlay("markers");
-        private GMapOverlay[] m_OverlaysPoligons =
-        {
-           new GMapOverlay("poligons layer 0"),
-           new GMapOverlay("poligons layer 1"),
-           new GMapOverlay("poligons layer 2")
-        };
 
-        private Bitmap[] ImageMarkers = 
+
+
+        //private GMapOverlay[] m_OverlaysPoligons =
+        //{
+        //   new GMapOverlay("poligons layer 0"),
+        //   new GMapOverlay("poligons layer 1"),
+        //   new GMapOverlay("poligons layer 2")
+        //};
+
+        //private Bitmap[] ImageMarkers = 
+        //{
+        //  (Bitmap) Image.FromFile("../../icons/icon_A.png"),
+        //  (Bitmap) Image.FromFile("../../icons/icon_B.png"),
+        //  (Bitmap) Image.FromFile("../../icons/icon_C.png")   
+        //};
+
+
+
+
+        private void ConnectUser(SQLiteConnection _db)
         {
-          (Bitmap) Image.FromFile("../../icons/icon_A.png"),
-          (Bitmap) Image.FromFile("../../icons/icon_B.png"),
-          (Bitmap) Image.FromFile("../../icons/icon_C.png")   
-        };
+
+            if (m_IsUser == false)
+            {
+                m_FormAdministrator = new FormUser(_db);
+                m_FormAdministrator.ShowDialog(this);
+
+                if (m_FormAdministrator.IsVariablee)
+                {
+                    m_IsAdministrator = m_FormAdministrator.IsAdministrator;
+                    m_IsUser = true;
+                    m_Username = m_FormAdministrator.Username;
+                    //labelUsername.Text = m_FormAdministrator.Username;
+                }
+                else
+                {
+                    Close();
+                }
+            }
+            else
+            {
+                m_IsAdministrator = false;
+                m_IsUser = false;
+                m_Username = "";
+                //labelUsername.Text = "Username";
+            }
+        }
 
 
         private double GetScaleMap()
@@ -71,6 +142,8 @@ public partial class FormMapa : Form
         }
 
 
+        
+
         private void Initilization_mapa(GMapControl _gMapa)
         {
             _gMapa.DragButton = MouseButtons.Left;
@@ -82,9 +155,9 @@ public partial class FormMapa : Form
             _gMapa.Zoom = 10;
             _gMapa.MapScaleInfoEnabled = true;
 
-            _gMapa.Overlays.Add(m_OverlaysPoligons[0]);
-            _gMapa.Overlays.Add(m_OverlaysPoligons[1]);
-            _gMapa.Overlays.Add(m_OverlaysPoligons[2]);
+            //_gMapa.Overlays.Add(m_OverlaysPoligons[0]);
+            //_gMapa.Overlays.Add(m_OverlaysPoligons[1]);
+            //_gMapa.Overlays.Add(m_OverlaysPoligons[2]);
             _gMapa.Overlays.Add(OverlayMarkers);
         }
         public FormMapa()
@@ -97,7 +170,10 @@ public partial class FormMapa : Form
             Initilization_mapa(gMapa as GMapControl);
             DB = new SQLiteConnection("Data Source=../../database/DB.db; Version=3");
             DB.Open();
+            LoadLayers();
             LoadInformationDB();
+
+            ConnectUser(DB);
         }
 
         private void gMapa_MouseDown(object sender, MouseEventArgs e)
@@ -151,7 +227,7 @@ public partial class FormMapa : Form
                     /**/
                     if(Distance < 0.3 && gpolypoints.Count >= 3)
                     {
-                        m_FormInterfaceVariables = new FormForVariables(HashElements,false);
+                        m_FormInterfaceVariables = new FormForVariables(HashElements,false,DB);
                         m_FormInterfaceVariables.ShowDialog(this);
 
                         //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
@@ -173,27 +249,30 @@ public partial class FormMapa : Form
                             //----------------------------------------------------------//
                             InfoPolygon plygone = new InfoPolygon(gpolypoints, m_FormInterfaceVariables.ToName);
 
-                            int typeIndex = m_FormInterfaceVariables.Type;
+                            //int typeIndex = m_FormInterfaceVariables.Type;
 
-                            Color[] colors = { Color.Red, Color.Green, Color.Blue };
+                            Color colore = m_HashColors[m_FormInterfaceVariables.ToType];
 
-                            plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colors[typeIndex]));
+                            plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
                             plygone.Stroke = new Pen(Color.Black, 1);
 
                             plygone.IsHitTestVisible = true;
+                            plygone.m_Username = m_Username;
+                            plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
                             plygone.m_toName = m_FormInterfaceVariables.ToName;
+                            plygone.m_toType = m_FormInterfaceVariables.ToType;
                             plygone.m_Type = m_FormInterfaceVariables.Type;
-                            plygone.m_Depth = m_FormInterfaceVariables.Depth;
+                            plygone.m_Depth = m_FormInterfaceVariables.Depth; 
 
-                            Console.WriteLine(m_FormInterfaceVariables.Type.ToString());
+                            //Console.WriteLine(m_FormInterfaceVariables.Type.ToString());
 
                             // ImageMarkers[typeIndex].SetResolution(25,25);
 
 
-
-                            plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
-                            m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
-                            m_OverlaysPoligons[typeIndex].Polygons.Add(plygone);
+                            System.Console.WriteLine("tototo Type:  " + plygone.m_toType);
+                            //plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
+                            //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                            GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
 
                             HashElements[plygone.m_toName] = plygone;
 
@@ -210,7 +289,7 @@ public partial class FormMapa : Form
                             OverlayMarkers.Polygons.Clear();
 
                             m_IsCreate = false;
-                            this.button5.BackColor = Color.White;
+                            //this.button5.BackColor = Color.White;
                         }
                     }
                     else 
@@ -288,22 +367,7 @@ public partial class FormMapa : Form
         private void button5_Click(object sender, EventArgs e)
         {
             m_IsCreate = !m_IsCreate;
-            this.button5.BackColor = (m_IsCreate) ? Color.Red : Color.White;
-        }
-
-        private void checkBoxLayer0_CheckedChanged(object sender, EventArgs e)
-        {
-            m_OverlaysPoligons[0].IsVisibile = this.checkBoxLayer0.Checked;
-        }
-
-        private void checkBoxLayer1_CheckedChanged(object sender, EventArgs e)
-        {
-            m_OverlaysPoligons[1].IsVisibile = this.checkBoxLayer1.Checked;
-        }
-
-        private void checkBoxLayer2_CheckedChanged(object sender, EventArgs e)
-        {
-            m_OverlaysPoligons[2].IsVisibile = this.checkBoxLayer2.Checked;
+           // this.button5.BackColor = (m_IsCreate) ? Color.Red : Color.White;
         }
 
         private void gMapa_OnPolygonClick(GMapPolygon item, MouseEventArgs e)
@@ -321,8 +385,8 @@ public partial class FormMapa : Form
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DeleteInfoInDB(m_SelectedInfoPolygon);
-            m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Polygons.Remove(m_SelectedInfoPolygon);
-            m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
+            GroundOverlays[m_SelectedInfoPolygon.m_toType].Polygons.Remove(m_SelectedInfoPolygon);
+            //m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
             HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
             DeleteElemntToListing(m_SelectedInfoPolygon.m_toName.ToString());
             gedgepoints.Clear();
@@ -339,7 +403,7 @@ public partial class FormMapa : Form
 
         private void ModifyToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements , true);
+            m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements , true, DB);
             m_FormInterfaceVariables.ShowDialog(this);
 
             //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
@@ -352,8 +416,8 @@ public partial class FormMapa : Form
             {
                 /**/
                 DeleteInfoInDB(m_SelectedInfoPolygon);
-                m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Polygons.Remove(m_SelectedInfoPolygon);
-                m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
+                GroundOverlays[m_SelectedInfoPolygon.m_toType].Polygons.Remove(m_SelectedInfoPolygon);
+                //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
                 HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
                 DeleteElemntToListing(m_SelectedInfoPolygon.m_toName.ToString());
                 gedgepoints.Clear();
@@ -364,36 +428,39 @@ public partial class FormMapa : Form
 
                 InfoPolygon plygone = new InfoPolygon(m_SelectedInfoPolygon.Points, m_SelectedInfoPolygon.Name);
 
+                plygone.m_Username = m_Username;
+                plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
                 plygone.m_toName = m_FormInterfaceVariables.ToName;
+                plygone.m_toType = m_FormInterfaceVariables.ToType;
                 plygone.m_Type = m_FormInterfaceVariables.Type;
                 plygone.m_Depth = m_FormInterfaceVariables.Depth;
 
                 /**/
-                int typeIndex = m_FormInterfaceVariables.Type;
 
-                Console.WriteLine(typeIndex);
-
-                Color[] colors = { Color.Red, Color.Green, Color.Blue };
+                Color colore = m_HashColors[ m_FormInterfaceVariables.ToType ];
 
                 plygone.IsHitTestVisible = true;
-                plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colors[typeIndex]));
+                plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
                 plygone.Stroke = new Pen(Color.Black, 1);
                 /**/
 
                 /**/
                 plygone.IsHitTestVisible = true;
+                plygone.m_Username = m_Username;
                 plygone.m_toName = m_FormInterfaceVariables.ToName;
+                plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
+                plygone.m_toType = m_FormInterfaceVariables.ToType;
                 plygone.m_Type = m_FormInterfaceVariables.Type;
                 plygone.m_Depth = m_FormInterfaceVariables.Depth;
                 /**/
 
                 /**/
-                Console.WriteLine(plygone.m_toName);
+                Console.WriteLine(m_FormInterfaceVariables.ToName);
                 this.listBoxElements.Items.Add(plygone.m_toName);
 
-                plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
-                m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
-                m_OverlaysPoligons[typeIndex].Polygons.Add(plygone);
+               // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
+               // m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
 
                 HashElements[plygone.m_toName] = plygone;
                 gMapa.ReloadMap();
@@ -402,7 +469,7 @@ public partial class FormMapa : Form
                 SaveInfoInDB(plygone);
 
                 m_IsCreate = false;
-                this.button5.BackColor = Color.White;
+                //this.button5.BackColor = Color.White;
                 /**/
             }
      
@@ -471,43 +538,55 @@ public partial class FormMapa : Form
         }
 
 
-        private void InfoToOutput(InfoPolygon _poly)
-        {
-            string[] ABC = { "A", "B", "C" };
-            labelInfo.Text = "     INFORMATION       \n\n" +
-                             "Name : " + _poly.m_toName.ToString() + " \n" + 
-                             "Group : " + ABC[_poly.m_Type] + "\n" +
-                             "Depth : " + _poly.m_Depth.ToString() + "\n";
-        }
-
         private void FormMapa_FormClosing(object sender, FormClosingEventArgs e)
         {
             DB.Close();
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-           
-            if(m_IsUser == false)
-            {
-                m_FormAdministrator = new FormUser(DB);
-                m_FormAdministrator.ShowDialog(this);
 
-                if(m_FormAdministrator.IsVariablee)
+
+        private void InfoToOutput(InfoPolygon _poly)
+        {
+            labelInfo.Text = "     INFORMATION       \n\n" +
+                             "----- Username ----- \n " +
+                             _poly.m_Username.ToString() + "\n" +
+                             "\n ----- Coords ----- \n " +
+                             "X: " + _poly.Origin.Lat.ToString() + "\n" +
+                             " Y: " + _poly.Origin.Lng.ToString() + " \n" +
+                             "\n ----- Data ----- \n " +
+                             "Name : " + _poly.m_toName.ToString() + " \n" +
+                             "Type : " + _poly.m_toType.ToString() + "\n" +
+                             "Depth : " + _poly.m_Depth.ToString() + "\n" +
+                             "\n ----- Info ----- \n " + 
+                             _poly.m_toInfoText.ToString() + "\n";
+        }
+
+  
+
+        private void LoadLayers()
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            CMD.CommandText = "select * from PollutionTypes";
+            SQLiteDataReader SQL = CMD.ExecuteReader();
+            if (SQL.HasRows)
+            {
+                while (SQL.Read())
                 {
-                    m_IsAdministrator = m_FormAdministrator.IsAdministrator;
-                    m_IsUser = true;
-                    buttonUser.Text = "Connect User";
+                    String name = SQL["Name"].ToString();
+
+                    checkedListBox1.Items.Add(name, true);
+
+                    int color;
+                    Int32.TryParse(SQL["Color"].ToString(), out color);
+                    m_HashColors[name] = Color.FromArgb(color);
+
+                    System.Console.WriteLine(name);
+                    var layer = new GMapOverlay(name);
+                    GroundOverlays.Add(name, layer);
+                    gMapa.Overlays.Add(layer);
                 }
             }
-            else 
-            {
-                m_IsAdministrator = false;
-                m_IsUser = false;
-                buttonUser.Text = "Disconnect User";
-            }
 
-         
         }
 
         private void DeleteInfoInDB(InfoPolygon _infoPoly)
@@ -523,14 +602,15 @@ public partial class FormMapa : Form
         private void SaveInfoInDB(InfoPolygon _infoPoly)
         {
             SQLiteCommand CMD = DB.CreateCommand();
-            CMD.CommandText = "insert or replace into Information(Name,Depth,Type,SizePoints,Points,Origin) " +
-                              "values(@name,@depth,@type,@sizePoints,@points,@origin)";
+            CMD.CommandText = "insert or replace into Information(Name,Depth,Type,SizePoints,Points,Origin,Username,Info) " +
+                              "values(@name,@depth,@type,@sizePoints,@points,@origin,@username,@info)";
 
             CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoPoly.m_toName;
-            CMD.Parameters.Add("@depth", System.Data.DbType.Double).Value = _infoPoly.m_Depth;
-            CMD.Parameters.Add("@type", System.Data.DbType.Int32).Value = _infoPoly.m_Type;
+            CMD.Parameters.Add("@depth", System.Data.DbType.Int32).Value = _infoPoly.m_Depth;
+            CMD.Parameters.Add("@type", System.Data.DbType.String).Value = _infoPoly.m_toType;
+            CMD.Parameters.Add("@username", System.Data.DbType.String).Value = _infoPoly.m_Username;
+            CMD.Parameters.Add("@info", System.Data.DbType.String).Value = _infoPoly.m_toInfoText;
             CMD.Parameters.Add("@sizePoints", System.Data.DbType.Int32).Value = _infoPoly.Points.Count;
-
 
             String jsonPoints = JsonConvert.SerializeObject(_infoPoly.Points);
             CMD.Parameters.Add("@points", System.Data.DbType.String).Value = jsonPoints;
@@ -551,18 +631,20 @@ public partial class FormMapa : Form
                 while (SQL.Read())
                 {
                     String name = SQL["Name"].ToString();
+                    String type = SQL["Type"].ToString();
+                    String username = SQL["Username"].ToString();
+                    String infotext = SQL["Info"].ToString();
                     int depth = 0;
-                    int type = 0;
                     int size = 0;
                     Int32.TryParse(SQL["Depth"].ToString(), out depth);
-                    Int32.TryParse(SQL["Type"].ToString(), out type);
                     Int32.TryParse(SQL["SizePoints"].ToString(), out size);
 
+                    
 
-                    System.Console.WriteLine("Name: " + name.ToString());
-                    System.Console.WriteLine("Depth:" + depth.ToString());
-                    System.Console.WriteLine("Type: " + type.ToString());
-                    System.Console.WriteLine("Size: " + size.ToString());
+                    //System.Console.WriteLine("Name: " + name.ToString());
+                    //System.Console.WriteLine("Depth:" + depth.ToString());
+                    //System.Console.WriteLine("Type: " + type.ToString());
+                    //System.Console.WriteLine("Size: " + size.ToString());
 
                     string jsonOrigin = SQL["Origin"].ToString();
                     PointLatLng desOrigin = JsonConvert.DeserializeObject<PointLatLng>(jsonOrigin);
@@ -583,24 +665,24 @@ public partial class FormMapa : Form
 
                         InfoPolygon plygone = new InfoPolygon(desPoints, name);
 
-                        int typeIndex = type;
+                        Color colore = m_HashColors[type];
 
-                        Color[] colors = { Color.Red, Color.Green, Color.Blue };
-
-                        plygone.Fill = new SolidBrush(Color.FromArgb(depth, colors[typeIndex]));
+                        plygone.Fill = new SolidBrush(Color.FromArgb(depth, colore));
                         plygone.Stroke = new Pen(Color.Black, 1);
 
                         plygone.IsHitTestVisible = true;
+                        plygone.m_toInfoText = infotext;
+                        plygone.m_Username = username;
                         plygone.m_toName = name;
-                        plygone.m_Type = type;
+                        plygone.m_toType = type;
                         plygone.m_Depth = depth;
 
                         Console.WriteLine(plygone.m_toName);
                         this.listBoxElements.Items.Add(plygone.m_toName);
 
-                        plygone.m_Marker = new GMarkerGoogle(desOrigin, ImageMarkers[typeIndex]);
-                        m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
-                        m_OverlaysPoligons[typeIndex].Polygons.Add(plygone);
+                        //plygone.m_Marker = new GMarkerGoogle(desOrigin, ImageMarkers[typeIndex]);
+                        //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                        GroundOverlays[type].Polygons.Add(plygone);
 
                         HashElements[plygone.m_toName] = plygone;
                         gMapa.ReloadMap();
@@ -611,26 +693,64 @@ public partial class FormMapa : Form
             }
         }
 
-    
+        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            var key = checkedListBox1.Items[e.Index].ToString();
+            if(GroundOverlays.ContainsKey(key))
+            {
+               GroundOverlays[key].IsVisibile = ValueCheck(e.NewValue);
+            }
+        }
+
+        private bool ValueCheck(CheckState Check)
+        {
+            if (Check == CheckState.Checked)
+                return true;
+            else
+                return false;
+        }
+
+
+
+        private void groundToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+          m_IsCreate = !m_IsCreate;
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+          Close();
+        }
+
+        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
 
 
     public class InfoPolygon : GMapPolygon
     {
-
+        public String m_Username;
+        public String m_toInfoText;
+        public String m_toType;
         public String m_toName;
         public int m_Type;
         public int m_Depth;
 
+       
         public PointLatLng Origin;
         // static GMapPolygon();
-        public GMapMarker m_Marker;
+        //public GMapMarker m_Marker;
 
         public InfoPolygon(InfoPolygon _infoPoly) :
             base(_infoPoly.Points, _infoPoly.Name)
         {
+            m_Username = _infoPoly.m_Username;
+            m_toInfoText = _infoPoly.m_toInfoText;
             m_toName = _infoPoly.m_toName;
+            m_toType = _infoPoly.m_toType;
             m_Type = _infoPoly.m_Type;
             m_Depth = _infoPoly.m_Depth;
 

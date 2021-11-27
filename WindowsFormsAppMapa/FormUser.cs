@@ -15,10 +15,12 @@ namespace WindowsFormsAppMapa
     {
         private bool m_IsAdministrator;
         private bool m_isVariablee;
+        private String m_Username;
         private SQLiteConnection DB;
 
         public bool IsAdministrator { get => m_IsAdministrator; set => m_IsAdministrator = value; }
         public bool IsVariablee { get => m_isVariablee; set => m_isVariablee = value; }
+        public string Username { get => m_Username; set => m_Username = value; }
 
         public FormUser(SQLiteConnection _db)
         {
@@ -26,6 +28,7 @@ namespace WindowsFormsAppMapa
             textBoxPass.PasswordChar = '*';
             DB = _db;
             m_isVariablee = false;
+            m_Username = "";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -76,6 +79,7 @@ namespace WindowsFormsAppMapa
             {
                 m_isVariablee = true;
                 m_IsAdministrator = Admin;
+                m_Username = textBoxUser.Text;
                 Close();
             }
 

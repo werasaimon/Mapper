@@ -2,9 +2,11 @@
 {
     partial class FormMapa
     {
-       
+
 
         #region Windows Form Designer generated code
+
+
 
         /// <summary>
         /// Required method for Designer support - do not modify
@@ -14,21 +16,24 @@
         {
             this.components = new System.ComponentModel.Container();
             this.gMapa = new GMap.NET.WindowsForms.GMapControl();
-            this.button5 = new System.Windows.Forms.Button();
-            this.checkBoxLayer0 = new System.Windows.Forms.CheckBox();
-            this.checkBoxLayer1 = new System.Windows.Forms.CheckBox();
-            this.checkBoxLayer2 = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ModifyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.buttonUser = new System.Windows.Forms.Button();
             this.listBoxElements = new System.Windows.Forms.ListBox();
             this.labelInfo = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.groundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.airToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.contextMenuStrip1.SuspendLayout();
-            this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -37,6 +42,16 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
+            this.splitContainer4.Panel1.SuspendLayout();
+            this.splitContainer4.Panel2.SuspendLayout();
+            this.splitContainer4.SuspendLayout();
             this.SuspendLayout();
             // 
             // gMapa
@@ -62,62 +77,13 @@
             this.gMapa.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapa.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapa.ShowTileGridLines = false;
-            this.gMapa.Size = new System.Drawing.Size(713, 396);
+            this.gMapa.Size = new System.Drawing.Size(625, 552);
             this.gMapa.TabIndex = 0;
             this.gMapa.Zoom = 0D;
             this.gMapa.OnPolygonClick += new GMap.NET.WindowsForms.PolygonClick(this.gMapa_OnPolygonClick);
             this.gMapa.OnPolygonDoubleClick += new GMap.NET.WindowsForms.PolygonDoubleClick(this.gMapa_OnPolygonDoubleClick);
             this.gMapa.MouseDown += new System.Windows.Forms.MouseEventHandler(this.gMapa_MouseDown);
             this.gMapa.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gMapa_MouseMove);
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(283, 19);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(169, 23);
-            this.button5.TabIndex = 6;
-            this.button5.Text = "Create_Polygon";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // checkBoxLayer0
-            // 
-            this.checkBoxLayer0.AutoSize = true;
-            this.checkBoxLayer0.Checked = true;
-            this.checkBoxLayer0.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLayer0.Location = new System.Drawing.Point(3, 19);
-            this.checkBoxLayer0.Name = "checkBoxLayer0";
-            this.checkBoxLayer0.Size = new System.Drawing.Size(75, 20);
-            this.checkBoxLayer0.TabIndex = 7;
-            this.checkBoxLayer0.Text = "Layer A";
-            this.checkBoxLayer0.UseVisualStyleBackColor = true;
-            this.checkBoxLayer0.CheckedChanged += new System.EventHandler(this.checkBoxLayer0_CheckedChanged);
-            // 
-            // checkBoxLayer1
-            // 
-            this.checkBoxLayer1.AutoSize = true;
-            this.checkBoxLayer1.Checked = true;
-            this.checkBoxLayer1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLayer1.Location = new System.Drawing.Point(96, 19);
-            this.checkBoxLayer1.Name = "checkBoxLayer1";
-            this.checkBoxLayer1.Size = new System.Drawing.Size(75, 20);
-            this.checkBoxLayer1.TabIndex = 8;
-            this.checkBoxLayer1.Text = "Layer B";
-            this.checkBoxLayer1.UseVisualStyleBackColor = true;
-            this.checkBoxLayer1.CheckedChanged += new System.EventHandler(this.checkBoxLayer1_CheckedChanged);
-            // 
-            // checkBoxLayer2
-            // 
-            this.checkBoxLayer2.AutoSize = true;
-            this.checkBoxLayer2.Checked = true;
-            this.checkBoxLayer2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLayer2.Location = new System.Drawing.Point(191, 19);
-            this.checkBoxLayer2.Name = "checkBoxLayer2";
-            this.checkBoxLayer2.Size = new System.Drawing.Size(75, 20);
-            this.checkBoxLayer2.TabIndex = 9;
-            this.checkBoxLayer2.Text = "Layer C";
-            this.checkBoxLayer2.UseVisualStyleBackColor = true;
-            this.checkBoxLayer2.CheckedChanged += new System.EventHandler(this.checkBoxLayer2_CheckedChanged);
             // 
             // contextMenuStrip1
             // 
@@ -142,29 +108,6 @@
             this.DeleteToolStripMenuItem.Text = "delete";
             this.DeleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
             // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.buttonUser);
-            this.panel1.Controls.Add(this.checkBoxLayer1);
-            this.panel1.Controls.Add(this.checkBoxLayer0);
-            this.panel1.Controls.Add(this.button5);
-            this.panel1.Controls.Add(this.checkBoxLayer2);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(940, 54);
-            this.panel1.TabIndex = 10;
-            // 
-            // buttonUser
-            // 
-            this.buttonUser.Location = new System.Drawing.Point(458, 19);
-            this.buttonUser.Name = "buttonUser";
-            this.buttonUser.Size = new System.Drawing.Size(171, 23);
-            this.buttonUser.TabIndex = 13;
-            this.buttonUser.Text = "User";
-            this.buttonUser.UseVisualStyleBackColor = true;
-            this.buttonUser.Click += new System.EventHandler(this.button4_Click);
-            // 
             // listBoxElements
             // 
             this.listBoxElements.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -173,7 +116,7 @@
             this.listBoxElements.ItemHeight = 25;
             this.listBoxElements.Location = new System.Drawing.Point(0, 0);
             this.listBoxElements.Name = "listBoxElements";
-            this.listBoxElements.Size = new System.Drawing.Size(223, 198);
+            this.listBoxElements.Size = new System.Drawing.Size(247, 276);
             this.listBoxElements.TabIndex = 0;
             this.listBoxElements.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxElements_DrawItem);
             this.listBoxElements.SelectedIndexChanged += new System.EventHandler(this.listBoxElements_SelectedIndexChanged);
@@ -203,41 +146,145 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.labelInfo);
-            this.splitContainer1.Size = new System.Drawing.Size(223, 396);
-            this.splitContainer1.SplitterDistance = 198;
+            this.splitContainer1.Size = new System.Drawing.Size(247, 552);
+            this.splitContainer1.SplitterDistance = 276;
             this.splitContainer1.TabIndex = 11;
             // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 54);
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
             this.splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.gMapa);
+            this.splitContainer2.Panel1.Controls.Add(this.splitContainer3);
             // 
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer1);
-            this.splitContainer2.Size = new System.Drawing.Size(940, 396);
-            this.splitContainer2.SplitterDistance = 713;
+            this.splitContainer2.Size = new System.Drawing.Size(1034, 552);
+            this.splitContainer2.SplitterDistance = 783;
             this.splitContainer2.TabIndex = 12;
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.checkedListBox1);
+            // 
+            // splitContainer3.Panel2
+            // 
+            this.splitContainer3.Panel2.Controls.Add(this.gMapa);
+            this.splitContainer3.Size = new System.Drawing.Size(783, 552);
+            this.splitContainer3.SplitterDistance = 154;
+            this.splitContainer3.TabIndex = 2;
+            // 
+            // checkedListBox1
+            // 
+            this.checkedListBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.ImeMode = System.Windows.Forms.ImeMode.Alpha;
+            this.checkedListBox1.Location = new System.Drawing.Point(0, 0);
+            this.checkedListBox1.Name = "checkedListBox1";
+            this.checkedListBox1.Size = new System.Drawing.Size(154, 552);
+            this.checkedListBox1.TabIndex = 1;
+            this.checkedListBox1.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox1_ItemCheck);
+            this.checkedListBox1.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.menuStrip1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1034, 28);
+            this.panel1.TabIndex = 13;
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1034, 28);
+            this.menuStrip1.TabIndex = 0;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // menuToolStripMenuItem
+            // 
+            this.menuToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.createToolStripMenuItem,
+            this.exitToolStripMenuItem});
+            this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
+            this.menuToolStripMenuItem.Size = new System.Drawing.Size(60, 24);
+            this.menuToolStripMenuItem.Text = "Menu";
+            // 
+            // createToolStripMenuItem
+            // 
+            this.createToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.groundToolStripMenuItem,
+            this.airToolStripMenuItem});
+            this.createToolStripMenuItem.Name = "createToolStripMenuItem";
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(135, 26);
+            this.createToolStripMenuItem.Text = "Create";
+            // 
+            // groundToolStripMenuItem
+            // 
+            this.groundToolStripMenuItem.Name = "groundToolStripMenuItem";
+            this.groundToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.groundToolStripMenuItem.Text = "Ground";
+            this.groundToolStripMenuItem.Click += new System.EventHandler(this.groundToolStripMenuItem_Click_1);
+            // 
+            // airToolStripMenuItem
+            // 
+            this.airToolStripMenuItem.Name = "airToolStripMenuItem";
+            this.airToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.airToolStripMenuItem.Text = "Air";
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(135, 26);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // splitContainer4
+            // 
+            this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer4.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer4.Name = "splitContainer4";
+            this.splitContainer4.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer4.Panel1
+            // 
+            this.splitContainer4.Panel1.Controls.Add(this.panel1);
+            // 
+            // splitContainer4.Panel2
+            // 
+            this.splitContainer4.Panel2.Controls.Add(this.splitContainer2);
+            this.splitContainer4.Size = new System.Drawing.Size(1034, 584);
+            this.splitContainer4.SplitterDistance = 28;
+            this.splitContainer4.TabIndex = 14;
             // 
             // FormMapa
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(940, 450);
-            this.Controls.Add(this.splitContainer2);
-            this.Controls.Add(this.panel1);
+            this.ClientSize = new System.Drawing.Size(1034, 584);
+            this.Controls.Add(this.splitContainer4);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "FormMapa";
             this.Text = "Form2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMapa_FormClosing);
             this.Load += new System.EventHandler(this.FormMapa_Load);
             this.contextMenuStrip1.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
@@ -247,6 +294,18 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.splitContainer4.Panel1.ResumeLayout(false);
+            this.splitContainer4.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
+            this.splitContainer4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -254,19 +313,23 @@
         #endregion
 
         private GMap.NET.WindowsForms.GMapControl gMapa;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.CheckBox checkBoxLayer0;
-        private System.Windows.Forms.CheckBox checkBoxLayer1;
-        private System.Windows.Forms.CheckBox checkBoxLayer2;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.ComponentModel.IContainer components;
         private System.Windows.Forms.ToolStripMenuItem ModifyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DeleteToolStripMenuItem;
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ListBox listBoxElements;
         private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.Button buttonUser;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.SplitContainer splitContainer4;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem menuToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem groundToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem airToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        protected System.Windows.Forms.CheckedListBox checkedListBox1;
     }
 }
