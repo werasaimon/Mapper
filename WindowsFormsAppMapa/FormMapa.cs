@@ -20,48 +20,13 @@ using Newtonsoft.Json;
 namespace WindowsFormsAppMapa
 {
 
-
-    /**
-    public class CustomCheckedListBox : CheckedListBox
-    {
-        public CustomCheckedListBox()
-        {
-            DoubleBuffered = true;
-        }
-        protected override void OnDrawItem(DrawItemEventArgs e)
-        {
-            Size checkSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, System.Windows.Forms.VisualStyles.CheckBoxState.MixedNormal);
-            int dx = (e.Bounds.Height - checkSize.Width) / 2;
-            e.DrawBackground();
-            bool isChecked = GetItemChecked(e.Index);//For some reason e.State doesn't work so we have to do this instead.
-            CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(dx, e.Bounds.Top + dx), isChecked ? System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal : System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
-            using (StringFormat sf = new StringFormat { LineAlignment = StringAlignment.Center })
-            {
-                using (Brush brush = new SolidBrush(isChecked ? CheckedItemColor : ForeColor))
-                {
-                    e.Graphics.DrawString(Items[e.Index].ToString(), Font, brush, new Rectangle(e.Bounds.Height, e.Bounds.Top, e.Bounds.Width - e.Bounds.Height, e.Bounds.Height), sf);
-                }
-            }
-        }
-        Color checkedItemColor = Color.Green;
-        public Color CheckedItemColor
-        {
-            get { return checkedItemColor; }
-            set
-            {
-                checkedItemColor = value;
-                Invalidate();
-            }
-        }
-    }
-    /**/
-
-
     public partial class FormMapa : Form
 {
         private bool m_IsUser;
         private bool m_IsAdministrator;
         private String m_Username;
+
+        private SQLiteConnection DB; // База данных 
 
         Dictionary<String, InfoBase> HashElements = new Dictionary<String, InfoBase>();
         Dictionary<String, GMapOverlay> GroundOverlays = new Dictionary<String, GMapOverlay>();
@@ -71,17 +36,17 @@ namespace WindowsFormsAppMapa
         private bool m_IsCreateGround;
         private bool m_IsCreateAir;
 
-        InfoBase m_SelectedInfoPolygon;
+        InfoBase m_SelectedInfoObject;
 
-        private FormForVariables m_FormInterfaceVariables;
+        private FormForGroundVariables m_FormInterfaceVariables;
         private FormForAirVariables m_FormInterfaceAirVariables;
         private FormUser m_FormAdministrator;
 
         private List<PointLatLng> gpolypoints = new List<PointLatLng>();
         private List<PointLatLng> gedgepoints = new List<PointLatLng>();
 
-        private SQLiteConnection DB;
-        private GMapOverlay OverlayMarkers = new GMapOverlay("markers");
+        
+        private GMapOverlay OverlayInterfaceMarkers = new GMapOverlay("interface markers");
 
 
         private List<Status> rowStatusGroundLayers = new List<Status>();
@@ -106,6 +71,9 @@ namespace WindowsFormsAppMapa
 
 
 
+        GMarkerGoogle m_MarkeCretaeAir = new GMarkerGoogle(new PointLatLng(0, 0), GMarkerGoogleType.arrow);
+        //
+
 
         private void ConnectUser(SQLiteConnection _db)
         {
@@ -124,6 +92,7 @@ namespace WindowsFormsAppMapa
                 }
                 else
                 {
+                    m_IsAdministrator = false;
                     Close();
                 }
             }
@@ -166,7 +135,7 @@ namespace WindowsFormsAppMapa
             //_gMapa.Overlays.Add(m_OverlaysPoligons[0]);
             //_gMapa.Overlays.Add(m_OverlaysPoligons[1]);
             //_gMapa.Overlays.Add(m_OverlaysPoligons[2]);
-            _gMapa.Overlays.Add(OverlayMarkers);
+            _gMapa.Overlays.Add(OverlayInterfaceMarkers);
         }
         public FormMapa()
         {
@@ -189,7 +158,7 @@ namespace WindowsFormsAppMapa
         private void gMapa_MouseDown(object sender, MouseEventArgs e)
         {
 
-            if (e.Button == MouseButtons.Right && (m_IsCreateGround || m_IsCreateAir))
+            if (e.Button == MouseButtons.Right)
             {
                 //base.OnMouseMove(e);
                 //Application.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
@@ -198,13 +167,13 @@ namespace WindowsFormsAppMapa
 
                 GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.arrow);
 
-                if(m_IsCreateAir)
+                if(m_IsCreateAir == true)
                 {
                     m_FormInterfaceAirVariables = new FormForAirVariables(HashElements, false, DB);
                     m_FormInterfaceAirVariables.ShowDialog(this);
 
-                    var m_Marker = new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.arrow);
-                    OverlayMarkers.Markers.Add(m_Marker);
+                    //var m_Marker = new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.arrow);
+                    //OverlayInterfaceMarkers.Markers.Add(m_Marker);
 
                     /**/
                     if (!m_FormInterfaceAirVariables.IsStatus)
@@ -213,15 +182,15 @@ namespace WindowsFormsAppMapa
                         m_FormInterfaceAirVariables.Close();
                         gedgepoints.Clear();
                         gpolypoints.Clear();
-                        OverlayMarkers.Markers.Clear();
-                        OverlayMarkers.Polygons.Clear();
+                        OverlayInterfaceMarkers.Markers.Clear();
+                        OverlayInterfaceMarkers.Polygons.Clear();
                     }
                     else
                     {
-                        Console.WriteLine("OK |||||||||||||| 22222222");
+                        //Console.WriteLine("OK |||||||||||||| 22222222");
                         m_FormInterfaceAirVariables.Close();
 
-                        Console.WriteLine("weraearararara 222222222\n");
+                        //Console.WriteLine("weraearararara 222222222\n");
                         //----------------------------------------------------------//
                         InfoAir markere = new InfoAir(new PointLatLng(Y, X), ImageMarkers[m_FormInterfaceAirVariables.IconIndex], m_FormInterfaceAirVariables.ToName);
                         
@@ -244,8 +213,8 @@ namespace WindowsFormsAppMapa
 
                         HashElements[markere.ToName] = markere;
 
-                        OverlayMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), ImageMarkers[markere.Icon]));
-                        OverlayMarkers.Markers.Add(markere);
+                        OverlayInterfaceMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), ImageMarkers[markere.Icon]));
+                        OverlayInterfaceMarkers.Markers.Add(markere);
                         SaveInfoAirInDB(markere);
 
                         Console.WriteLine(markere.ToName);
@@ -255,164 +224,179 @@ namespace WindowsFormsAppMapa
 
                         gedgepoints.Clear();
                         gpolypoints.Clear();
-                        OverlayMarkers.Markers.Clear();
-                        OverlayMarkers.Polygons.Clear();
+                        OverlayInterfaceMarkers.Markers.Clear();
+                        OverlayInterfaceMarkers.Polygons.Clear();
 
                         m_IsCreateAir = false;
                         m_IsCreateGround = false;
                         //this.button5.BackColor = Color.White;
                     }
-                    /**/
-                    return;
+                    
                 }
-                   
-
-                if(gpolypoints.Count == 0)
+                else if(m_IsCreateGround == true)
                 {
-                    gpolypoints.Add(new PointLatLng(Y, X));
-                    OverlayMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.orange_small));
-                    OverlayMarkers.Markers.Add(marker);
-
-                    gedgepoints.Add(new PointLatLng(Y, X));
-                    gedgepoints.Add(new PointLatLng(Y, X));
-                    GMapPolygon _poly = new GMapPolygon(gedgepoints, "line");
-                    _poly.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
-                    _poly.Stroke = new Pen(Color.Black, 2);
-                    OverlayMarkers.Polygons.Add(_poly);
-                }
-                else
-                {
-                    /**
-                    GPoint _A = gMapa.FromLatLngToLocal(gpolypoints[0]);
-                    GPoint _B = gMapa.FromLatLngToLocal(gpolypoints[gpolypoints.Count-1]);
-
-                   
-                    double Distance = Math.Pow(_A.X - _B.X, 2.0) +
-                                      Math.Pow(_A.Y - _B.Y, 2.0);
-                    Distance = Math.Sqrt(Distance);
-
-                    **/
-
-
-                    GMapRoute route = new GMapRoute("getScale");
-                    route.Points.Add(gpolypoints[0]);
-                    route.Points.Add(new PointLatLng(Y, X));
-                    var Distance = route.Distance / GetScaleMap();
-
-                    Console.WriteLine((Distance).ToString() +  "  < " + (0.3).ToString());
-               
-                    /**/
-                    if(Distance < 0.3 && gpolypoints.Count >= 3)
+                    if (gpolypoints.Count == 0)
                     {
-                        m_FormInterfaceVariables = new FormForVariables(HashElements,false,DB);
-                        m_FormInterfaceVariables.ShowDialog(this);
+                        gpolypoints.Add(new PointLatLng(Y, X));
+                        OverlayInterfaceMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.orange_small));
+                        OverlayInterfaceMarkers.Markers.Add(marker);
 
-                        //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
-                        if (!m_FormInterfaceVariables.IsStatus)
+                        gedgepoints.Add(new PointLatLng(Y, X));
+                        gedgepoints.Add(new PointLatLng(Y, X));
+                        GMapPolygon _poly = new GMapPolygon(gedgepoints, "line");
+                        _poly.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
+                        _poly.Stroke = new Pen(Color.Black, 2);
+                        OverlayInterfaceMarkers.Polygons.Add(_poly);
+                    }
+                    else
+                    {
+                        /**
+                        GPoint _A = gMapa.FromLatLngToLocal(gpolypoints[0]);
+                        GPoint _B = gMapa.FromLatLngToLocal(gpolypoints[gpolypoints.Count-1]);
+
+                       
+                        double Distance = Math.Pow(_A.X - _B.X, 2.0) +
+                                          Math.Pow(_A.Y - _B.Y, 2.0);
+                        Distance = Math.Sqrt(Distance);
+
+                        **/
+
+
+                        GMapRoute route = new GMapRoute("getScale");
+                        route.Points.Add(gpolypoints[0]);
+                        route.Points.Add(new PointLatLng(Y, X));
+                        var Distance = route.Distance / GetScaleMap();
+
+                        Console.WriteLine((Distance).ToString() + "  < " + (0.3).ToString());
+
+                        /**/
+                        if (Distance < 0.3 && gpolypoints.Count >= 3)
                         {
-                            Console.WriteLine("Cancel |||| ");
-                            m_FormInterfaceVariables.Close();
-                            gedgepoints.Clear();
-                            gpolypoints.Clear();
-                            OverlayMarkers.Markers.Clear();
-                            OverlayMarkers.Polygons.Clear();
+                            m_FormInterfaceVariables = new FormForGroundVariables(HashElements, false, DB);
+                            m_FormInterfaceVariables.ShowDialog(this);
+
+                            //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
+                            if (!m_FormInterfaceVariables.IsStatus)
+                            {
+                                Console.WriteLine("Cancel |||| ");
+                                m_FormInterfaceVariables.Close();
+                                gedgepoints.Clear();
+                                gpolypoints.Clear();
+                                OverlayInterfaceMarkers.Markers.Clear();
+                                OverlayInterfaceMarkers.Polygons.Clear();
+                            }
+                            else
+                            {
+                                //Console.WriteLine("OK ||||||||||||||");
+                                m_FormInterfaceVariables.Close();
+
+                                //Console.WriteLine("weraearararara\n");
+                                //----------------------------------------------------------//
+                                InfoGround plygone = new InfoGround(gpolypoints, m_FormInterfaceVariables.ToName);
+
+                                //int typeIndex = m_FormInterfaceVariables.Type;
+
+                                Color colore = m_HashColors[m_FormInterfaceVariables.ToType];
+
+                                plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
+                                plygone.Stroke = new Pen(Color.Black, 1);
+
+                                plygone.IsHitTestVisible = true;
+                                plygone.Username = m_Username;
+                                plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
+                                plygone.ToName = m_FormInterfaceVariables.ToName;
+                                plygone.ToType = m_FormInterfaceVariables.ToType;
+                                plygone.Depth = m_FormInterfaceVariables.Depth;
+
+                                //Console.WriteLine(m_FormInterfaceVariables.Type.ToString());
+
+                                // ImageMarkers[typeIndex].SetResolution(25,25);
+
+
+                                //System.Console.WriteLine("tototo Type:  " + plygone.ToType);
+                                //plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
+                                //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                                GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
+
+                                HashElements[plygone.ToName] = plygone;
+
+                                SaveInfoGroundInDB(plygone);
+
+                                Console.WriteLine(plygone.ToName);
+                                this.listBoxElements.Items.Add(plygone.ToName);
+
+                                gMapa.ReloadMap();
+
+                                gedgepoints.Clear();
+                                gpolypoints.Clear();
+                                OverlayInterfaceMarkers.Markers.Clear();
+                                OverlayInterfaceMarkers.Polygons.Clear();
+
+                                m_IsCreateGround = false;
+                                //this.button5.BackColor = Color.White;
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("OK ||||||||||||||");
-                            m_FormInterfaceVariables.Close();
 
-                            Console.WriteLine("weraearararara\n");
-                            //----------------------------------------------------------//
-                            InfoGround plygone = new InfoGround(gpolypoints, m_FormInterfaceVariables.ToName);
+                            List<PointLatLng> _polypoints = new List<PointLatLng>();
+                            _polypoints.Add(gpolypoints[gpolypoints.Count - 1]);
+                            _polypoints.Add(new PointLatLng(Y, X));
+                            GMapPolygon _poly = new GMapPolygon(_polypoints, "line");
+                            _poly.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
+                            _poly.Stroke = new Pen(Color.Black, 2);
+                            OverlayInterfaceMarkers.Polygons.Add(_poly);
 
-                            //int typeIndex = m_FormInterfaceVariables.Type;
-
-                            Color colore = m_HashColors[m_FormInterfaceVariables.ToType];
-
-                            plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
-                            plygone.Stroke = new Pen(Color.Black, 1);
-
-                            plygone.IsHitTestVisible = true;
-                            plygone.Username = m_Username;
-                            plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
-                            plygone.ToName = m_FormInterfaceVariables.ToName;
-                            plygone.ToType = m_FormInterfaceVariables.ToType;
-                            plygone.Depth = m_FormInterfaceVariables.Depth; 
-
-                            //Console.WriteLine(m_FormInterfaceVariables.Type.ToString());
-
-                            // ImageMarkers[typeIndex].SetResolution(25,25);
-
-
-                            //System.Console.WriteLine("tototo Type:  " + plygone.ToType);
-                            //plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
-                            //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
-                            GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
-
-                            HashElements[plygone.ToName] = plygone;
-
-                            SaveInfoGroundInDB(plygone);
-
-                            Console.WriteLine(plygone.ToName);
-                            this.listBoxElements.Items.Add(plygone.ToName);
-
-                            gMapa.ReloadMap();
-
-                            gedgepoints.Clear();
-                            gpolypoints.Clear();
-                            OverlayMarkers.Markers.Clear();
-                            OverlayMarkers.Polygons.Clear();
-
-                            m_IsCreateGround = false;
-                            //this.button5.BackColor = Color.White;
+                            gpolypoints.Add(new PointLatLng(Y, X));
+                            OverlayInterfaceMarkers.Markers.Add(marker);
                         }
+                        /**/
                     }
-                    else 
-                    {
+                }
+                   
 
-                        List<PointLatLng> _polypoints = new List<PointLatLng>();
-                        _polypoints.Add(gpolypoints[gpolypoints.Count-1]);
-                        _polypoints.Add(new PointLatLng(Y, X));
-                        GMapPolygon _poly = new GMapPolygon(_polypoints,"line");
-                        _poly.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
-                        _poly.Stroke = new Pen(Color.Black, 2);
-                        OverlayMarkers.Polygons.Add(_poly);
-
-                        gpolypoints.Add(new PointLatLng(Y, X));
-                        OverlayMarkers.Markers.Add(marker);
-                    }
-                    /**/
-                }  
+               
             }
         }
 
-
         private void gMapa_MouseMove(object sender, MouseEventArgs e)
         {
-            if(gpolypoints.Count >= 1)
+
+            if (m_IsCreateAir || m_IsCreateGround)
+            {
+               double X = gMapa.FromLocalToLatLng(e.X, e.Y).Lng;
+               double Y = gMapa.FromLocalToLatLng(e.X, e.Y).Lat;
+
+               m_MarkeCretaeAir.Position = new PointLatLng(Y, X);
+            }
+
+              
+
+            /**
+            if(gpolypoints.Count >= 1 || true )
             {
                 double X = gMapa.FromLocalToLatLng(e.X, e.Y).Lng;
                 double Y = gMapa.FromLocalToLatLng(e.X, e.Y).Lat;
 
-                OverlayMarkers.Markers[0].Position = new PointLatLng(Y, X);
+                OverlayInterfaceMarkers.Markers[0].Position = new PointLatLng(Y, X);
+                m_MarkeRRR.Position = new PointLatLng(Y, X);
 
-                /**
                 int xx = e.X - this.gMapa.Width / 2;
                 int yy = e.Y - this.gMapa.Height / 2;
                 Console.WriteLine("X :" + xx.ToString() + "   Y :" + yy.ToString());
 
-                int w = OverlayMarkers.Markers[0].LocalArea.Width;
-                int h = OverlayMarkers.Markers[0].LocalArea.Height;
+                int w = OverlayInterfaceMarkers.Markers[0].LocalArea.Width;
+                int h = OverlayInterfaceMarkers.Markers[0].LocalArea.Height;
 
                 Console.WriteLine("W :" + w.ToString() + "   H :" + h.ToString());
 
                 var cx=gMapa.Location.X;
                 var cy=gMapa.Location.Y;
 
-                OverlayMarkers.Markers[0].LocalPosition = new Point(cx-(xx - (w/2 - 5)), cy-(yy - h));
-                **/
+                OverlayInterfaceMarkers.Markers[0].LocalPosition = new Point(cx-(xx - (w/2 - 5)), cy-(yy - h));
+            
             }
+           /**/
         }
 
         private void gMapa_OnPolygonDoubleClick(GMapPolygon item, MouseEventArgs e)
@@ -429,27 +413,19 @@ namespace WindowsFormsAppMapa
 
             var ppoly = new InfoGround((InfoGround)item);
             ppoly.Fill = new SolidBrush(Color.FromArgb(50, Color.White));
-            OverlayMarkers.Polygons.Clear();
-            OverlayMarkers.Polygons.Add(ppoly);
+            OverlayInterfaceMarkers.Polygons.Clear();
+            OverlayInterfaceMarkers.Polygons.Add(ppoly);
 
             InfoToOutput(ppoly);
             //listBoxElements.SelectedItem = iitem.m_toName.ToString();
             //listBoxElements.Focus();
             /**/
 
-
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            m_IsCreateGround = !m_IsCreateGround;
-            if (m_IsCreateGround) m_IsCreateAir = false;
-           // this.button5.BackColor = (m_IsCreate) ? Color.Red : Color.White;
         }
 
         private void gMapa_OnPolygonClick(GMapPolygon item, MouseEventArgs e)
         {
-            m_SelectedInfoPolygon = (InfoBase)item;
+            m_SelectedInfoObject = (InfoBase)item;
             if (e.Button == MouseButtons.Right)
             {    
                 if (e.Button == MouseButtons.Right)
@@ -461,64 +437,69 @@ namespace WindowsFormsAppMapa
 
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Ground)
+            if (m_IsAdministrator == false)
             {
-              DeleteInfoGrountInDB(m_SelectedInfoPolygon);
-              GroundOverlays[m_SelectedInfoPolygon.ToType].Polygons.Remove((InfoGround)m_SelectedInfoPolygon);
+                MessageBox.Show(" У вас нет прав Администратора ", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
-            else if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Air)
+
+            if (m_SelectedInfoObject.SeasonType == SeasonTypeInfo.Ground)
             {
-                DeleteInfoAirInDB(m_SelectedInfoPolygon);
-                AirOverlays[m_SelectedInfoPolygon.ToType].Markers.Remove((InfoAir)m_SelectedInfoPolygon);
+              DeleteInfoGrountInDB(m_SelectedInfoObject);
+              GroundOverlays[m_SelectedInfoObject.ToType].Polygons.Remove((InfoGround)m_SelectedInfoObject);
+            }
+            else if (m_SelectedInfoObject.SeasonType == SeasonTypeInfo.Air)
+            {
+                DeleteInfoAirInDB(m_SelectedInfoObject);
+                AirOverlays[m_SelectedInfoObject.ToType].Markers.Remove((InfoAir)m_SelectedInfoObject);
             }
 
 
-                //m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
-            HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
-            DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
+                //m_OverlaysPoligons[m_SelectedInfoObject.m_Type].Markers.Remove(m_SelectedInfoObject.m_Marker);
+            HashElements.Remove(m_SelectedInfoObject.ToName.ToString());
+            DeleteElemntToListing(m_SelectedInfoObject.ToName.ToString());
             gedgepoints.Clear();
             gpolypoints.Clear();
-            OverlayMarkers.Markers.Clear();
-            OverlayMarkers.Polygons.Clear();
+            OverlayInterfaceMarkers.Markers.Clear();
+            OverlayInterfaceMarkers.Polygons.Clear();
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            this.listBoxElements.Items.Add("wera suka");
-        }
 
         private void ModifyToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
+            if (m_IsAdministrator == false)
+            {
+                MessageBox.Show(" У вас нет прав Администратора ", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-
-            if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Ground)
+            if (m_SelectedInfoObject.SeasonType == SeasonTypeInfo.Ground)
             {
 
-                m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements, true, DB);
+                m_FormInterfaceVariables = new FormForGroundVariables(m_SelectedInfoObject, HashElements, true, DB);
                 m_FormInterfaceVariables.ShowDialog(this);
 
                 //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
                 if (!m_FormInterfaceVariables.IsStatus)
                 {
-                    Console.WriteLine("Cancel |||| ");
+                    //Console.WriteLine("Cancel |||| ");
                     m_FormInterfaceVariables.Close();
                 }
-                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
+                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoObject.m_toName)
                 {
                     /**/
-                    DeleteInfoGrountInDB(m_SelectedInfoPolygon);
-                    GroundOverlays[m_SelectedInfoPolygon.ToType].Polygons.Remove((InfoGround)m_SelectedInfoPolygon);
-                    //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
-                    HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
-                    DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
+                    DeleteInfoGrountInDB(m_SelectedInfoObject);
+                    GroundOverlays[m_SelectedInfoObject.ToType].Polygons.Remove((InfoGround)m_SelectedInfoObject);
+                    //GroundOverlays[m_SelectedInfoObject.m_toType].Markers.Remove(m_SelectedInfoObject.m_Marker);
+                    HashElements.Remove(m_SelectedInfoObject.ToName.ToString());
+                    DeleteElemntToListing(m_SelectedInfoObject.ToName.ToString());
                     gedgepoints.Clear();
                     gpolypoints.Clear();
-                    OverlayMarkers.Markers.Clear();
-                    OverlayMarkers.Polygons.Clear();
+                    OverlayInterfaceMarkers.Markers.Clear();
+                    OverlayInterfaceMarkers.Polygons.Clear();
                     /**/
 
-                    InfoGround plygone = new InfoGround(((InfoGround)m_SelectedInfoPolygon).Points, ((InfoGround)m_SelectedInfoPolygon).Name);
+                    InfoGround plygone = new InfoGround(((InfoGround)m_SelectedInfoObject).Points, ((InfoGround)m_SelectedInfoObject).Name);
 
                     plygone.Username = m_Username;
                     plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
@@ -545,7 +526,7 @@ namespace WindowsFormsAppMapa
                     /**/
 
                     /**/
-                    Console.WriteLine(m_FormInterfaceVariables.ToName);
+                    //Console.WriteLine(m_FormInterfaceVariables.ToName);
                     this.listBoxElements.Items.Add(plygone.ToName);
 
                     // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
@@ -555,7 +536,7 @@ namespace WindowsFormsAppMapa
                     HashElements[plygone.ToName] = plygone;
                     gMapa.ReloadMap();
 
-                    //m_SelectedInfoPolygon = plygone;
+                    m_SelectedInfoObject = plygone;
                     SaveInfoGroundInDB(plygone);
 
                     m_IsCreateAir = false;
@@ -564,34 +545,34 @@ namespace WindowsFormsAppMapa
                     /**/
                 }
             }
-            else if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Air)
+            else if (m_SelectedInfoObject.SeasonType == SeasonTypeInfo.Air)
             {
 
-                m_FormInterfaceAirVariables = new FormForAirVariables(m_SelectedInfoPolygon, HashElements, true, DB);
+                m_FormInterfaceAirVariables = new FormForAirVariables(m_SelectedInfoObject, HashElements, true, DB);
                 m_FormInterfaceAirVariables.ShowDialog(this);
 
 
                 //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
                 if (!m_FormInterfaceAirVariables.IsStatus)
                 {
-                    Console.WriteLine("Cancel |||| ");
+                    //Console.WriteLine("Cancel |||| ");
                     m_FormInterfaceAirVariables.Close();
                 }
-                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
+                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoObject.m_toName)
                 {
                     /**/
-                    DeleteInfoAirInDB(m_SelectedInfoPolygon);
-                    AirOverlays[m_SelectedInfoPolygon.ToType].Markers.Remove((InfoAir)m_SelectedInfoPolygon);
-                    //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
-                    HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
-                    DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
+                    DeleteInfoAirInDB(m_SelectedInfoObject);
+                    AirOverlays[m_SelectedInfoObject.ToType].Markers.Remove((InfoAir)m_SelectedInfoObject);
+                    //GroundOverlays[m_SelectedInfoObject.m_toType].Markers.Remove(m_SelectedInfoObject.m_Marker);
+                    HashElements.Remove(m_SelectedInfoObject.ToName.ToString());
+                    DeleteElemntToListing(m_SelectedInfoObject.ToName.ToString());
                     gedgepoints.Clear();
                     gpolypoints.Clear();
-                    OverlayMarkers.Markers.Clear();
-                    OverlayMarkers.Polygons.Clear();
+                    OverlayInterfaceMarkers.Markers.Clear();
+                    OverlayInterfaceMarkers.Polygons.Clear();
                     /**/
 
-                    InfoAir marker = new InfoAir(((InfoAir)m_SelectedInfoPolygon).Origin,
+                    InfoAir marker = new InfoAir(((InfoAir)m_SelectedInfoObject).Origin,
                                                 ImageMarkers[m_FormInterfaceAirVariables.IconIndex],
                                                 m_FormInterfaceAirVariables.ToName);
 
@@ -624,7 +605,7 @@ namespace WindowsFormsAppMapa
                     /**/
 
                     /**/
-                    Console.WriteLine(m_FormInterfaceAirVariables.ToName);
+                    //Console.WriteLine(m_FormInterfaceAirVariables.ToName);
                     this.listBoxElements.Items.Add(marker.ToName);
 
                     // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
@@ -634,7 +615,7 @@ namespace WindowsFormsAppMapa
                     HashElements[marker.ToName] = marker;
                     gMapa.ReloadMap();
 
-                    //m_SelectedInfoPolygon = plygone;
+                    //m_SelectedInfoObject = plygone;
                     SaveInfoAirInDB(marker);
 
                     m_IsCreateAir = false;
@@ -665,8 +646,8 @@ namespace WindowsFormsAppMapa
                 {
                   var ppoly = new InfoGround((InfoGround)item);
                   ppoly.Fill = new SolidBrush(Color.FromArgb(50, Color.White));
-                  OverlayMarkers.Polygons.Clear();
-                  OverlayMarkers.Polygons.Add(ppoly);
+                  OverlayInterfaceMarkers.Polygons.Clear();
+                  OverlayInterfaceMarkers.Polygons.Add(ppoly);
                 }
 
               
@@ -719,30 +700,36 @@ namespace WindowsFormsAppMapa
 
 
 
-        private void InfoToOutput(InfoBase _poly)
+        private void InfoToOutput(InfoBase _pObject)
         {
-            labelInfo.Text = "     INFORMATION       \n\n" +
-                             "----- Username ----- \n " +
-                             _poly.Username.ToString() + "\n" +
-                             "\n ----- Coords ----- \n " +
-                             "X: " + _poly.Origin.Lat.ToString() + "\n" +
-                             " Y: " + _poly.Origin.Lng.ToString() + " \n" +
-                             "\n ----- Data ----- \n " +
-                             "Name : " + _poly.ToName.ToString() + " \n" +
-                             "Type : " + _poly.ToType.ToString() + "\n" +
-                             "Depth : " + _poly.Depth.ToString() + "\n" +
-                             "\n ----- Info ----- \n " + 
-                             _poly.ToInfoText.ToString() + "\n";
+            //labelInfo.Text = "      INFORMATION      \n\n" +
+            //                 "----- Username ----- \n " +
+            //                 _poly.Username.ToString() + "\n" +
+            //                 "\n ----- Coords ----- \n " +
+            //                 "X: " + _poly.Origin.Lat.ToString() + "\n" +
+            //                 " Y: " + _poly.Origin.Lng.ToString() + " \n" +
+            //                 "\n ----- Data ----- \n " +
+            //                 "Name : " + _poly.ToName.ToString() + " \n" +
+            //                 "Type : " + _poly.ToType.ToString() + "\n" +
+            //                 "Depth : " + _poly.Depth.ToString() + "\n" +
+            //                 "\n ----- Info ----- \n " + 
+            //                 _poly.ToInfoText.ToString() + "\n";
 
-            labelInfoOutput.Text = "           INFORMATION :: " +
+
+            labelInfo.Text = "      INFORMATION      \n\n" +
+                            "--------------------------\n\n " +
+                            _pObject.ToInfoText.ToString() + "\n";
+
+
+            labelInfoOutput.Text = "        PARAMETERS   :: " +
                              "| Username: " +
-                             _poly.Username.ToString() + " |   " +
+                             _pObject.Username.ToString() + " |   " +
                              " | Coords: " +
-                             " X: " + _poly.Origin.Lat.ToString() + " , " +
-                             " Y: " + _poly.Origin.Lng.ToString() + " |   " +
-                             "| Name : " + _poly.ToName.ToString() + " |  " +
-                             "| Type : " + _poly.ToType.ToString() + " |  " +
-                             "| Depth : " + _poly.Depth.ToString() + " |  \n\n";
+                             " X: " + _pObject.Origin.Lat.ToString() + " , " +
+                             " Y: " + _pObject.Origin.Lng.ToString() + " |   " +
+                             "| Name : " + _pObject.ToName.ToString() + " |  " +
+                             "| Type : " + _pObject.ToType.ToString() + " |  " +
+                             "| Pollution Level = " + ((_pObject.Depth / 2.5)).ToString() + "% |  \n\n";
         }
 
   
@@ -807,7 +794,7 @@ namespace WindowsFormsAppMapa
         {
             SQLiteCommand CMD = DB.CreateCommand();
             String name = _infoPoly.ToName;
-            CMD.CommandText = "DELETE FROM Information WHERE Name='" + name + "';";
+            CMD.CommandText = "DELETE FROM InformationGround WHERE Name='" + name + "';";
             CMD.ExecuteNonQuery();
             CMD.Dispose();
         }
@@ -825,7 +812,7 @@ namespace WindowsFormsAppMapa
         private void SaveInfoGroundInDB(InfoGround _infoPoly)
         {
             SQLiteCommand CMD = DB.CreateCommand();
-            CMD.CommandText = "insert or replace into Information(Name,Depth,Type,SizePoints,Points,Origin,Username,Info) " +
+            CMD.CommandText = "insert or replace into InformationGround(Name,Depth,Type,SizePoints,Points,Origin,Username,Info) " +
                               "values(@name,@depth,@type,@sizePoints,@points,@origin,@username,@info)";
 
             CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoPoly.ToName;
@@ -866,7 +853,7 @@ namespace WindowsFormsAppMapa
         private void LoadInformationGroundDB()
         {
             SQLiteCommand CMD = DB.CreateCommand();
-            CMD.CommandText = "select * from Information";
+            CMD.CommandText = "select * from InformationGround";
             SQLiteDataReader SQL = CMD.ExecuteReader();
             if (SQL.HasRows)
             {
@@ -969,7 +956,9 @@ namespace WindowsFormsAppMapa
 
                         InfoAir marker = new InfoAir(desOrigin, ImageMarkers[icon], name);
 
-                        Color colore = m_HashColors[type];
+                        //Color colore = m_HashColors[type];
+
+
 
                         //plygone.Fill = new SolidBrush(Color.FromArgb(depth, colore));
                         //plygone.Stroke = new Pen(Color.Black, 1);
@@ -1012,14 +1001,38 @@ namespace WindowsFormsAppMapa
 
         private void groundToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-           m_IsCreateGround = !m_IsCreateGround;
-           if (m_IsCreateGround) m_IsCreateAir = false;
+            if (m_IsAdministrator == false)
+            {
+                MessageBox.Show(" У вас нет прав Администратора ", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            m_IsCreateGround = !m_IsCreateGround;
+            if (m_IsCreateGround)
+            {
+                m_MarkeCretaeAir.ToolTipText = "Key Right Mouse";
+                OverlayInterfaceMarkers.Markers.Add(m_MarkeCretaeAir);
+
+                m_IsCreateAir = false;
+            }
+          
         }
 
         private void airToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (m_IsAdministrator == false)
+            {
+                MessageBox.Show(" У вас нет прав Администратора ", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             m_IsCreateAir = !m_IsCreateAir;
-            if (m_IsCreateAir) m_IsCreateGround = false;
+            if (m_IsCreateAir)
+            {
+                m_MarkeCretaeAir.ToolTipText = "Key Right Mouse";
+                OverlayInterfaceMarkers.Markers.Add(m_MarkeCretaeAir);
+                m_IsCreateGround = false;
+            }
+   
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1029,7 +1042,7 @@ namespace WindowsFormsAppMapa
 
    
 
-        private Color customCheckedListBoxGround_GetBackColor(CustomCheckedListBox listbox, DrawItemEventArgs e)
+        private Color customCheckedListBoxGround_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
         {
             return rowStatusGroundLayers[e.Index].background;
         }
@@ -1043,14 +1056,9 @@ namespace WindowsFormsAppMapa
             }
         }
 
-        private Color customCheckedListBoxAir_GetBackColor(CustomCheckedListBox listbox, DrawItemEventArgs e)
+        private Color customCheckedListBoxAir_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
         {
             return rowStatusAirLayers[e.Index].background;
-        }
-
-        private void customCheckedListBoxAir_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void gMapa_OnMarkerDoubleClick(GMapMarker item, MouseEventArgs e)
@@ -1071,7 +1079,7 @@ namespace WindowsFormsAppMapa
         {
             if(!m_IsCreateAir && !m_IsCreateGround)
             {
-              m_SelectedInfoPolygon = (InfoAir)item;
+              m_SelectedInfoObject = (InfoAir)item;
               if (e.Button == MouseButtons.Right)
               {
                 if (e.Button == MouseButtons.Right)
@@ -1081,11 +1089,6 @@ namespace WindowsFormsAppMapa
               }
             }
           
-        }
-
-        private void toolStripComboBox1_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -1140,6 +1143,11 @@ namespace WindowsFormsAppMapa
                     customCheckedListBoxGround.SetItemChecked(i, true);
                 }
             }
+        }
+
+        private void customCheckedListBoxGround_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

@@ -117,11 +117,17 @@ namespace WindowsFormsAppMapa
         {
             SQLiteCommand CMD = DB.CreateCommand();
             String name = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+
             CMD.CommandText = "DELETE FROM PollutionTypes WHERE Name='" + name + "';";
             CMD.ExecuteNonQuery();
 
-            CMD.CommandText = "DELETE FROM Information WHERE Type='" + name + "';";
+            CMD.CommandText = "DELETE FROM InformationGround WHERE Type='" + name + "';";
             CMD.ExecuteNonQuery();
+
+
+            CMD.CommandText = "DELETE FROM InformationAir WHERE Type='" + name + "';";
+            CMD.ExecuteNonQuery();
+
             CMD.Dispose();
 
             UpdateTable();

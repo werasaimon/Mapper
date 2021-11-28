@@ -25,8 +25,6 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
-            this.customCheckedListBoxGround = new WindowsFormsAppMapa.CustomCheckedListBox();
-            this.customCheckedListBoxAir = new WindowsFormsAppMapa.CustomCheckedListBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.labelInfoOutput = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -38,6 +36,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.customCheckedListBoxGround = new Qodex.CustomCheckedListBox();
+            this.customCheckedListBoxAir = new Qodex.CustomCheckedListBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -213,31 +213,6 @@
             this.splitContainer5.SplitterDistance = 179;
             this.splitContainer5.TabIndex = 16;
             // 
-            // customCheckedListBoxGround
-            // 
-            this.customCheckedListBoxGround.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.customCheckedListBoxGround.DrawFocusedIndicator = false;
-            this.customCheckedListBoxGround.FormattingEnabled = true;
-            this.customCheckedListBoxGround.Location = new System.Drawing.Point(0, 0);
-            this.customCheckedListBoxGround.Name = "customCheckedListBoxGround";
-            this.customCheckedListBoxGround.Size = new System.Drawing.Size(125, 179);
-            this.customCheckedListBoxGround.TabIndex = 1;
-            this.customCheckedListBoxGround.GetBackColor += new WindowsFormsAppMapa.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxGround_GetBackColor);
-            this.customCheckedListBoxGround.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxGround_ItemCheck);
-            // 
-            // customCheckedListBoxAir
-            // 
-            this.customCheckedListBoxAir.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.customCheckedListBoxAir.DrawFocusedIndicator = false;
-            this.customCheckedListBoxAir.FormattingEnabled = true;
-            this.customCheckedListBoxAir.Location = new System.Drawing.Point(0, 0);
-            this.customCheckedListBoxAir.Name = "customCheckedListBoxAir";
-            this.customCheckedListBoxAir.Size = new System.Drawing.Size(125, 330);
-            this.customCheckedListBoxAir.TabIndex = 15;
-            this.customCheckedListBoxAir.GetBackColor += new WindowsFormsAppMapa.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxAir_GetBackColor);
-            this.customCheckedListBoxAir.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxAir_ItemCheck);
-            this.customCheckedListBoxAir.SelectedIndexChanged += new System.EventHandler(this.customCheckedListBoxAir_SelectedIndexChanged);
-            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.labelInfoOutput);
@@ -288,34 +263,34 @@
             this.groundToolStripMenuItem,
             this.airToolStripMenuItem});
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(135, 26);
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.createToolStripMenuItem.Text = "Create";
             // 
             // groundToolStripMenuItem
             // 
             this.groundToolStripMenuItem.Name = "groundToolStripMenuItem";
-            this.groundToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.groundToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.groundToolStripMenuItem.Text = "Ground";
             this.groundToolStripMenuItem.Click += new System.EventHandler(this.groundToolStripMenuItem_Click_1);
             // 
             // airToolStripMenuItem
             // 
             this.airToolStripMenuItem.Name = "airToolStripMenuItem";
-            this.airToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.airToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.airToolStripMenuItem.Text = "Air";
             this.airToolStripMenuItem.Click += new System.EventHandler(this.airToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(135, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(132, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
             // 
             // toolStripComboBox1
             // 
@@ -327,7 +302,6 @@
             this.toolStripComboBox1.Name = "toolStripComboBox1";
             this.toolStripComboBox1.Size = new System.Drawing.Size(121, 28);
             this.toolStripComboBox1.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBox1_SelectedIndexChanged);
-            this.toolStripComboBox1.Click += new System.EventHandler(this.toolStripComboBox1_Click);
             this.toolStripComboBox1.TextChanged += new System.EventHandler(this.toolStripComboBox1_TextChanged);
             // 
             // splitContainer4
@@ -347,6 +321,31 @@
             this.splitContainer4.Size = new System.Drawing.Size(1034, 584);
             this.splitContainer4.SplitterDistance = 67;
             this.splitContainer4.TabIndex = 14;
+            // 
+            // customCheckedListBoxGround
+            // 
+            this.customCheckedListBoxGround.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.customCheckedListBoxGround.DrawFocusedIndicator = false;
+            this.customCheckedListBoxGround.FormattingEnabled = true;
+            this.customCheckedListBoxGround.Location = new System.Drawing.Point(0, 0);
+            this.customCheckedListBoxGround.Name = "customCheckedListBoxGround";
+            this.customCheckedListBoxGround.Size = new System.Drawing.Size(125, 179);
+            this.customCheckedListBoxGround.TabIndex = 1;
+            this.customCheckedListBoxGround.GetBackColor += new Qodex.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxGround_GetBackColor);
+            this.customCheckedListBoxGround.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxGround_ItemCheck);
+            this.customCheckedListBoxGround.SelectedIndexChanged += new System.EventHandler(this.customCheckedListBoxGround_SelectedIndexChanged);
+            // 
+            // customCheckedListBoxAir
+            // 
+            this.customCheckedListBoxAir.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.customCheckedListBoxAir.DrawFocusedIndicator = false;
+            this.customCheckedListBoxAir.FormattingEnabled = true;
+            this.customCheckedListBoxAir.Location = new System.Drawing.Point(0, 0);
+            this.customCheckedListBoxAir.Name = "customCheckedListBoxAir";
+            this.customCheckedListBoxAir.Size = new System.Drawing.Size(125, 330);
+            this.customCheckedListBoxAir.TabIndex = 15;
+            this.customCheckedListBoxAir.GetBackColor += new Qodex.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxAir_GetBackColor);
+            this.customCheckedListBoxAir.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxAir_ItemCheck);
             // 
             // FormMapa
             // 
@@ -408,8 +407,8 @@
         private System.Windows.Forms.ToolStripMenuItem groundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem airToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private CustomCheckedListBox customCheckedListBoxGround;
-        private CustomCheckedListBox customCheckedListBoxAir;
+        private Qodex.CustomCheckedListBox customCheckedListBoxGround;
+        private Qodex.CustomCheckedListBox customCheckedListBoxAir;
         private System.Windows.Forms.SplitContainer splitContainer5;
         private System.Windows.Forms.ListBox listBoxElements;
         private System.Windows.Forms.Label labelInfoOutput;

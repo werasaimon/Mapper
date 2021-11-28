@@ -115,11 +115,11 @@
     <Compile Include="FormForAirVariables.Designer.cs">
       <DependentUpon>FormForAirVariables.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormForVariables.cs">
+    <Compile Include="FormForGroundVariables.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormForVariables.Designer.cs">
-      <DependentUpon>FormForVariables.cs</DependentUpon>
+    <Compile Include="FormForGroundVariables.Designer.cs">
+      <DependentUpon>FormForGroundVariables.cs</DependentUpon>
     </Compile>
     <Compile Include="FormPollutionTypes.cs">
       <SubType>Form</SubType>
@@ -153,8 +153,8 @@
     <EmbeddedResource Include="FormForAirVariables.resx">
       <DependentUpon>FormForAirVariables.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormForVariables.resx">
-      <DependentUpon>FormForVariables.cs</DependentUpon>
+    <EmbeddedResource Include="FormForGroundVariables.resx">
+      <DependentUpon>FormForGroundVariables.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPollutionTypes.resx">
       <DependentUpon>FormPollutionTypes.cs</DependentUpon>

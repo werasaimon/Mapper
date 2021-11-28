@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsAppMapa
 {
-    partial class FormForAirVariables
+    partial class FormForGroundVariables
     {
         /// <summary>
         /// Required designer variable.
@@ -28,18 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.OK = new System.Windows.Forms.Button();
             this.Cancel = new System.Windows.Forms.Button();
             this.comboBoxType = new System.Windows.Forms.ComboBox();
             this.textBoxNmae = new System.Windows.Forms.TextBox();
             this.trackBarDepth = new System.Windows.Forms.TrackBar();
             this.labelLevel = new System.Windows.Forms.Label();
-            this.OK = new System.Windows.Forms.Button();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.customCheckedListBox1 = new Qodex.CustomCheckedListBox();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.cboFace = new System.Windows.Forms.ComboBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDepth)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -54,19 +52,20 @@
             this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
             // 
-            // richTextBox1
+            // OK
             // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(449, 322);
-            this.richTextBox1.TabIndex = 8;
-            this.richTextBox1.Text = "";
+            this.OK.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.OK.Location = new System.Drawing.Point(115, 65);
+            this.OK.Name = "OK";
+            this.OK.Size = new System.Drawing.Size(103, 36);
+            this.OK.TabIndex = 0;
+            this.OK.Text = "OK";
+            this.OK.UseVisualStyleBackColor = true;
+            this.OK.Click += new System.EventHandler(this.OK_Click);
             // 
             // Cancel
             // 
-            this.Cancel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.Cancel.Location = new System.Drawing.Point(3, 113);
+            this.Cancel.Location = new System.Drawing.Point(3, 65);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(106, 36);
             this.Cancel.TabIndex = 1;
@@ -83,7 +82,7 @@
             this.comboBoxType.FormattingEnabled = true;
             this.comboBoxType.Location = new System.Drawing.Point(3, 3);
             this.comboBoxType.Name = "comboBoxType";
-            this.comboBoxType.Size = new System.Drawing.Size(446, 35);
+            this.comboBoxType.Size = new System.Drawing.Size(483, 35);
             this.comboBoxType.TabIndex = 0;
             this.comboBoxType.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBoxType_DrawItem);
             this.comboBoxType.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.comboBoxType_MeasureItem);
@@ -96,7 +95,7 @@
             this.textBoxNmae.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.textBoxNmae.Location = new System.Drawing.Point(3, 40);
             this.textBoxNmae.Name = "textBoxNmae";
-            this.textBoxNmae.Size = new System.Drawing.Size(446, 32);
+            this.textBoxNmae.Size = new System.Drawing.Size(483, 32);
             this.textBoxNmae.TabIndex = 3;
             this.textBoxNmae.Text = "Name Marker";
             this.textBoxNmae.Enter += new System.EventHandler(this.textBoxNmae_Enter);
@@ -105,11 +104,11 @@
             // trackBarDepth
             // 
             this.trackBarDepth.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.trackBarDepth.Location = new System.Drawing.Point(3, 51);
-            this.trackBarDepth.Maximum = 255;
+            this.trackBarDepth.Location = new System.Drawing.Point(3, 3);
+            this.trackBarDepth.Maximum = 250;
             this.trackBarDepth.Minimum = 50;
             this.trackBarDepth.Name = "trackBarDepth";
-            this.trackBarDepth.Size = new System.Drawing.Size(446, 56);
+            this.trackBarDepth.Size = new System.Drawing.Size(490, 56);
             this.trackBarDepth.TabIndex = 4;
             this.trackBarDepth.Value = 55;
             this.trackBarDepth.Scroll += new System.EventHandler(this.trackBarDepth_Scroll);
@@ -123,16 +122,14 @@
             this.labelLevel.TabIndex = 5;
             this.labelLevel.Text = "Pollution Level = 20%";
             // 
-            // OK
+            // richTextBox1
             // 
-            this.OK.Dock = System.Windows.Forms.DockStyle.Top;
-            this.OK.Location = new System.Drawing.Point(115, 113);
-            this.OK.Name = "OK";
-            this.OK.Size = new System.Drawing.Size(103, 36);
-            this.OK.TabIndex = 0;
-            this.OK.Text = "OK";
-            this.OK.UseVisualStyleBackColor = true;
-            this.OK.Click += new System.EventHandler(this.OK_Click);
+            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(513, 338);
+            this.richTextBox1.TabIndex = 8;
+            this.richTextBox1.Text = "";
             // 
             // tableLayoutPanel1
             // 
@@ -145,7 +142,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(452, 74);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(489, 74);
             this.tableLayoutPanel1.TabIndex = 9;
             // 
             // splitContainer1
@@ -162,47 +159,21 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.customCheckedListBox1);
             this.splitContainer1.Panel2.Controls.Add(this.richTextBox1);
-            this.splitContainer1.Size = new System.Drawing.Size(449, 429);
-            this.splitContainer1.SplitterDistance = 103;
+            this.splitContainer1.Size = new System.Drawing.Size(513, 451);
+            this.splitContainer1.SplitterDistance = 109;
             this.splitContainer1.TabIndex = 10;
-            // 
-            // customCheckedListBox1
-            // 
-            this.customCheckedListBox1.DrawFocusedIndicator = false;
-            this.customCheckedListBox1.FormattingEnabled = true;
-            this.customCheckedListBox1.Location = new System.Drawing.Point(394, 166);
-            this.customCheckedListBox1.Name = "customCheckedListBox1";
-            this.customCheckedListBox1.Size = new System.Drawing.Size(8, 4);
-            this.customCheckedListBox1.TabIndex = 9;
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Controls.Add(this.cboFace);
             this.flowLayoutPanel1.Controls.Add(this.trackBarDepth);
             this.flowLayoutPanel1.Controls.Add(this.Cancel);
             this.flowLayoutPanel1.Controls.Add(this.OK);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(449, 151);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(513, 158);
             this.flowLayoutPanel1.TabIndex = 11;
-            // 
-            // cboFace
-            // 
-            this.cboFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboFace.Font = new System.Drawing.Font("Arial", 16F);
-            this.cboFace.FormattingEnabled = true;
-            this.cboFace.Items.AddRange(new object[] {
-            "vhvh",
-            "hgvgv",
-            "g"});
-            this.cboFace.Location = new System.Drawing.Point(4, 4);
-            this.cboFace.Margin = new System.Windows.Forms.Padding(4);
-            this.cboFace.Name = "cboFace";
-            this.cboFace.Size = new System.Drawing.Size(448, 40);
-            this.cboFace.TabIndex = 10;
             // 
             // splitContainer2
             // 
@@ -218,19 +189,19 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.flowLayoutPanel1);
-            this.splitContainer2.Size = new System.Drawing.Size(449, 584);
-            this.splitContainer2.SplitterDistance = 429;
-            this.splitContainer2.TabIndex = 13;
+            this.splitContainer2.Size = new System.Drawing.Size(513, 613);
+            this.splitContainer2.SplitterDistance = 451;
+            this.splitContainer2.TabIndex = 12;
             // 
-            // FormForAirVariables
+            // FormForGroundVariables
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(449, 584);
+            this.ClientSize = new System.Drawing.Size(513, 613);
             this.Controls.Add(this.splitContainer2);
-            this.Name = "FormForAirVariables";
-            this.Text = "FormForAirVariables";
-            this.Load += new System.EventHandler(this.FormForAirVariables_Load);
+            this.Name = "FormForGroundVariables";
+            this.Text = "FormForVariabless";
+            this.Load += new System.EventHandler(this.FormForGroundVariables_Load);
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDepth)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -251,18 +222,16 @@
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button OK;
         private System.Windows.Forms.Button Cancel;
         private System.Windows.Forms.ComboBox comboBoxType;
         private System.Windows.Forms.TextBox textBoxNmae;
         private System.Windows.Forms.TrackBar trackBarDepth;
         private System.Windows.Forms.Label labelLevel;
-        private System.Windows.Forms.Button OK;
+        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private Qodex.CustomCheckedListBox customCheckedListBox1;
-        private System.Windows.Forms.ComboBox cboFace;
     }
 }
