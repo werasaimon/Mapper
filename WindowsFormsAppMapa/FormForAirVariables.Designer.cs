@@ -39,7 +39,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.customCheckedListBox1 = new Qodex.CustomCheckedListBox();
+            this.customCheckedListBox1 = new CustomCheckedListBox();
             this.cboFace = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDepth)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -261,7 +261,7 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private Qodex.CustomCheckedListBox customCheckedListBox1;
+        private CustomCheckedListBox customCheckedListBox1;
         private System.Windows.Forms.ComboBox cboFace;
     }
 }

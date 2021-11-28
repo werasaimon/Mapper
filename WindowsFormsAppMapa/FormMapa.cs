@@ -1029,7 +1029,7 @@ namespace WindowsFormsAppMapa
 
    
 
-        private Color customCheckedListBoxGround_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
+        private Color customCheckedListBoxGround_GetBackColor(CustomCheckedListBox listbox, DrawItemEventArgs e)
         {
             return rowStatusGroundLayers[e.Index].background;
         }
@@ -1043,7 +1043,7 @@ namespace WindowsFormsAppMapa
             }
         }
 
-        private Color customCheckedListBoxAir_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
+        private Color customCheckedListBoxAir_GetBackColor(CustomCheckedListBox listbox, DrawItemEventArgs e)
         {
             return rowStatusAirLayers[e.Index].background;
         }

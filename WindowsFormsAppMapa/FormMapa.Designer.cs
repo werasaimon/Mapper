@@ -25,8 +25,8 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
-            this.customCheckedListBoxGround = new Qodex.CustomCheckedListBox();
-            this.customCheckedListBoxAir = new Qodex.CustomCheckedListBox();
+            this.customCheckedListBoxGround = new WindowsFormsAppMapa.CustomCheckedListBox();
+            this.customCheckedListBoxAir = new WindowsFormsAppMapa.CustomCheckedListBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.labelInfoOutput = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -222,7 +222,7 @@
             this.customCheckedListBoxGround.Name = "customCheckedListBoxGround";
             this.customCheckedListBoxGround.Size = new System.Drawing.Size(125, 179);
             this.customCheckedListBoxGround.TabIndex = 1;
-            this.customCheckedListBoxGround.GetBackColor += new Qodex.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxGround_GetBackColor);
+            this.customCheckedListBoxGround.GetBackColor += new WindowsFormsAppMapa.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxGround_GetBackColor);
             this.customCheckedListBoxGround.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxGround_ItemCheck);
             // 
             // customCheckedListBoxAir
@@ -234,7 +234,7 @@
             this.customCheckedListBoxAir.Name = "customCheckedListBoxAir";
             this.customCheckedListBoxAir.Size = new System.Drawing.Size(125, 330);
             this.customCheckedListBoxAir.TabIndex = 15;
-            this.customCheckedListBoxAir.GetBackColor += new Qodex.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxAir_GetBackColor);
+            this.customCheckedListBoxAir.GetBackColor += new WindowsFormsAppMapa.CustomCheckedListBox.GetColorDelegate(this.customCheckedListBoxAir_GetBackColor);
             this.customCheckedListBoxAir.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.customCheckedListBoxAir_ItemCheck);
             this.customCheckedListBoxAir.SelectedIndexChanged += new System.EventHandler(this.customCheckedListBoxAir_SelectedIndexChanged);
             // 
@@ -408,8 +408,8 @@
         private System.Windows.Forms.ToolStripMenuItem groundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem airToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private Qodex.CustomCheckedListBox customCheckedListBoxGround;
-        private Qodex.CustomCheckedListBox customCheckedListBoxAir;
+        private CustomCheckedListBox customCheckedListBoxGround;
+        private CustomCheckedListBox customCheckedListBoxAir;
         private System.Windows.Forms.SplitContainer splitContainer5;
         private System.Windows.Forms.ListBox listBoxElements;
         private System.Windows.Forms.Label labelInfoOutput;
