@@ -63,15 +63,18 @@ namespace WindowsFormsAppMapa
         private bool m_IsAdministrator;
         private String m_Username;
 
-        Dictionary<String, InfoPolygon> HashElements = new Dictionary<String, InfoPolygon>();
+        Dictionary<String, InfoBase> HashElements = new Dictionary<String, InfoBase>();
         Dictionary<String, GMapOverlay> GroundOverlays = new Dictionary<String, GMapOverlay>();
+        Dictionary<String, GMapOverlay> AirOverlays = new Dictionary<String, GMapOverlay>();
         Dictionary<String, Color> m_HashColors = new Dictionary<String, Color>();
 
-        private bool m_IsCreate;
+        private bool m_IsCreateGround;
+        private bool m_IsCreateAir;
 
-        InfoPolygon m_SelectedInfoPolygon;
+        InfoBase m_SelectedInfoPolygon;
 
         private FormForVariables m_FormInterfaceVariables;
+        private FormForAirVariables m_FormInterfaceAirVariables;
         private FormUser m_FormAdministrator;
 
         private List<PointLatLng> gpolypoints = new List<PointLatLng>();
@@ -81,6 +84,9 @@ namespace WindowsFormsAppMapa
         private GMapOverlay OverlayMarkers = new GMapOverlay("markers");
 
 
+        private List<Status> rowStatusGroundLayers = new List<Status>();
+        private List<Status> rowStatusAirLayers = new List<Status>();
+
 
         //private GMapOverlay[] m_OverlaysPoligons =
         //{
@@ -89,12 +95,14 @@ namespace WindowsFormsAppMapa
         //   new GMapOverlay("poligons layer 2")
         //};
 
-        //private Bitmap[] ImageMarkers = 
-        //{
-        //  (Bitmap) Image.FromFile("../../icons/icon_A.png"),
-        //  (Bitmap) Image.FromFile("../../icons/icon_B.png"),
-        //  (Bitmap) Image.FromFile("../../icons/icon_C.png")   
-        //};
+        private Bitmap[] ImageMarkers =
+         {
+          (Bitmap) Image.FromFile("../../icons/rd1.png"),
+          (Bitmap) Image.FromFile("../../icons/rd2.png"),
+          (Bitmap) Image.FromFile("../../icons/rd3.png"),
+          (Bitmap) Image.FromFile("../../icons/rd4.png")
+
+        };
 
 
 
@@ -163,6 +171,7 @@ namespace WindowsFormsAppMapa
         public FormMapa()
         {
             InitializeComponent();
+            toolStripComboBox1.SelectedIndex = 0;
         }
 
         private void FormMapa_Load(object sender, EventArgs e)
@@ -171,7 +180,8 @@ namespace WindowsFormsAppMapa
             DB = new SQLiteConnection("Data Source=../../database/DB.db; Version=3");
             DB.Open();
             LoadLayers();
-            LoadInformationDB();
+            LoadInformationGroundDB();
+            LoadInformationAirdDB();
 
             ConnectUser(DB);
         }
@@ -179,7 +189,7 @@ namespace WindowsFormsAppMapa
         private void gMapa_MouseDown(object sender, MouseEventArgs e)
         {
 
-            if (e.Button == MouseButtons.Right && m_IsCreate)
+            if (e.Button == MouseButtons.Right && (m_IsCreateGround || m_IsCreateAir))
             {
                 //base.OnMouseMove(e);
                 //Application.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
@@ -188,13 +198,80 @@ namespace WindowsFormsAppMapa
 
                 GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.arrow);
 
+                if(m_IsCreateAir)
+                {
+                    m_FormInterfaceAirVariables = new FormForAirVariables(HashElements, false, DB);
+                    m_FormInterfaceAirVariables.ShowDialog(this);
+
+                    var m_Marker = new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.arrow);
+                    OverlayMarkers.Markers.Add(m_Marker);
+
+                    /**/
+                    if (!m_FormInterfaceAirVariables.IsStatus)
+                    {
+                        Console.WriteLine("Cancel |||| ");
+                        m_FormInterfaceAirVariables.Close();
+                        gedgepoints.Clear();
+                        gpolypoints.Clear();
+                        OverlayMarkers.Markers.Clear();
+                        OverlayMarkers.Polygons.Clear();
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK |||||||||||||| 22222222");
+                        m_FormInterfaceAirVariables.Close();
+
+                        Console.WriteLine("weraearararara 222222222\n");
+                        //----------------------------------------------------------//
+                        InfoAir markere = new InfoAir(new PointLatLng(Y, X), ImageMarkers[m_FormInterfaceAirVariables.IconIndex], m_FormInterfaceAirVariables.ToName);
+                        
+                        //int typeIndex = m_FormInterfaceVariables.Type;
+
+                        Color colore = m_HashColors[m_FormInterfaceAirVariables.ToType];
+
+
+                        markere.Username = m_Username;
+                        markere.ToInfoText = m_FormInterfaceAirVariables.ToInfoText;
+                        markere.ToName = m_FormInterfaceAirVariables.ToName;
+                        markere.ToType = m_FormInterfaceAirVariables.ToType;
+                        markere.Depth = m_FormInterfaceAirVariables.Depth;
+                        markere.Icon = m_FormInterfaceAirVariables.IconIndex;
+
+                        markere.ToolTipText = markere.ToName;
+
+
+                        AirOverlays[m_FormInterfaceAirVariables.ToType].Markers.Add(markere);
+
+                        HashElements[markere.ToName] = markere;
+
+                        OverlayMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), ImageMarkers[markere.Icon]));
+                        OverlayMarkers.Markers.Add(markere);
+                        SaveInfoAirInDB(markere);
+
+                        Console.WriteLine(markere.ToName);
+                        this.listBoxElements.Items.Add(markere.ToName);
+
+                        gMapa.ReloadMap();
+
+                        gedgepoints.Clear();
+                        gpolypoints.Clear();
+                        OverlayMarkers.Markers.Clear();
+                        OverlayMarkers.Polygons.Clear();
+
+                        m_IsCreateAir = false;
+                        m_IsCreateGround = false;
+                        //this.button5.BackColor = Color.White;
+                    }
+                    /**/
+                    return;
+                }
+                   
+
                 if(gpolypoints.Count == 0)
                 {
                     gpolypoints.Add(new PointLatLng(Y, X));
                     OverlayMarkers.Markers.Add(new GMarkerGoogle(new PointLatLng(Y, X), GMarkerGoogleType.orange_small));
                     OverlayMarkers.Markers.Add(marker);
-
-
 
                     gedgepoints.Add(new PointLatLng(Y, X));
                     gedgepoints.Add(new PointLatLng(Y, X));
@@ -247,7 +324,7 @@ namespace WindowsFormsAppMapa
 
                             Console.WriteLine("weraearararara\n");
                             //----------------------------------------------------------//
-                            InfoPolygon plygone = new InfoPolygon(gpolypoints, m_FormInterfaceVariables.ToName);
+                            InfoGround plygone = new InfoGround(gpolypoints, m_FormInterfaceVariables.ToName);
 
                             //int typeIndex = m_FormInterfaceVariables.Type;
 
@@ -257,29 +334,28 @@ namespace WindowsFormsAppMapa
                             plygone.Stroke = new Pen(Color.Black, 1);
 
                             plygone.IsHitTestVisible = true;
-                            plygone.m_Username = m_Username;
-                            plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
-                            plygone.m_toName = m_FormInterfaceVariables.ToName;
-                            plygone.m_toType = m_FormInterfaceVariables.ToType;
-                            plygone.m_Type = m_FormInterfaceVariables.Type;
-                            plygone.m_Depth = m_FormInterfaceVariables.Depth; 
+                            plygone.Username = m_Username;
+                            plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
+                            plygone.ToName = m_FormInterfaceVariables.ToName;
+                            plygone.ToType = m_FormInterfaceVariables.ToType;
+                            plygone.Depth = m_FormInterfaceVariables.Depth; 
 
                             //Console.WriteLine(m_FormInterfaceVariables.Type.ToString());
 
                             // ImageMarkers[typeIndex].SetResolution(25,25);
 
 
-                            System.Console.WriteLine("tototo Type:  " + plygone.m_toType);
+                            //System.Console.WriteLine("tototo Type:  " + plygone.ToType);
                             //plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
                             //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
                             GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
 
-                            HashElements[plygone.m_toName] = plygone;
+                            HashElements[plygone.ToName] = plygone;
 
-                            SaveInfoInDB(plygone);
+                            SaveInfoGroundInDB(plygone);
 
-                            Console.WriteLine(plygone.m_toName);
-                            this.listBoxElements.Items.Add(plygone.m_toName);
+                            Console.WriteLine(plygone.ToName);
+                            this.listBoxElements.Items.Add(plygone.ToName);
 
                             gMapa.ReloadMap();
 
@@ -288,7 +364,7 @@ namespace WindowsFormsAppMapa
                             OverlayMarkers.Markers.Clear();
                             OverlayMarkers.Polygons.Clear();
 
-                            m_IsCreate = false;
+                            m_IsCreateGround = false;
                             //this.button5.BackColor = Color.White;
                         }
                     }
@@ -348,10 +424,10 @@ namespace WindowsFormsAppMapa
            // item.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
 
 
-            //var iitem = (InfoPolygon)item;
+            //var iitem = (InfoGround)item;
             //Console.WriteLine(iitem.m_toName);
 
-            var ppoly = new InfoPolygon((InfoPolygon)item);
+            var ppoly = new InfoGround((InfoGround)item);
             ppoly.Fill = new SolidBrush(Color.FromArgb(50, Color.White));
             OverlayMarkers.Polygons.Clear();
             OverlayMarkers.Polygons.Add(ppoly);
@@ -366,13 +442,14 @@ namespace WindowsFormsAppMapa
 
         private void button5_Click(object sender, EventArgs e)
         {
-            m_IsCreate = !m_IsCreate;
+            m_IsCreateGround = !m_IsCreateGround;
+            if (m_IsCreateGround) m_IsCreateAir = false;
            // this.button5.BackColor = (m_IsCreate) ? Color.Red : Color.White;
         }
 
         private void gMapa_OnPolygonClick(GMapPolygon item, MouseEventArgs e)
         {
-            m_SelectedInfoPolygon = (InfoPolygon)item;
+            m_SelectedInfoPolygon = (InfoBase)item;
             if (e.Button == MouseButtons.Right)
             {    
                 if (e.Button == MouseButtons.Right)
@@ -384,11 +461,21 @@ namespace WindowsFormsAppMapa
 
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DeleteInfoInDB(m_SelectedInfoPolygon);
-            GroundOverlays[m_SelectedInfoPolygon.m_toType].Polygons.Remove(m_SelectedInfoPolygon);
-            //m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
-            HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
-            DeleteElemntToListing(m_SelectedInfoPolygon.m_toName.ToString());
+            if(m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Ground)
+            {
+              DeleteInfoGrountInDB(m_SelectedInfoPolygon);
+              GroundOverlays[m_SelectedInfoPolygon.ToType].Polygons.Remove((InfoGround)m_SelectedInfoPolygon);
+            }
+            else if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Air)
+            {
+                DeleteInfoAirInDB(m_SelectedInfoPolygon);
+                AirOverlays[m_SelectedInfoPolygon.ToType].Markers.Remove((InfoAir)m_SelectedInfoPolygon);
+            }
+
+
+                //m_OverlaysPoligons[m_SelectedInfoPolygon.m_Type].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
+            HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
+            DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
             gedgepoints.Clear();
             gpolypoints.Clear();
             OverlayMarkers.Markers.Clear();
@@ -403,77 +490,160 @@ namespace WindowsFormsAppMapa
 
         private void ModifyToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements , true, DB);
-            m_FormInterfaceVariables.ShowDialog(this);
 
-            //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
-            if (!m_FormInterfaceVariables.IsStatus)
+
+            if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Ground)
             {
-                Console.WriteLine("Cancel |||| ");
-                m_FormInterfaceVariables.Close();
+
+                m_FormInterfaceVariables = new FormForVariables(m_SelectedInfoPolygon, HashElements, true, DB);
+                m_FormInterfaceVariables.ShowDialog(this);
+
+                //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
+                if (!m_FormInterfaceVariables.IsStatus)
+                {
+                    Console.WriteLine("Cancel |||| ");
+                    m_FormInterfaceVariables.Close();
+                }
+                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
+                {
+                    /**/
+                    DeleteInfoGrountInDB(m_SelectedInfoPolygon);
+                    GroundOverlays[m_SelectedInfoPolygon.ToType].Polygons.Remove((InfoGround)m_SelectedInfoPolygon);
+                    //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
+                    HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
+                    DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
+                    gedgepoints.Clear();
+                    gpolypoints.Clear();
+                    OverlayMarkers.Markers.Clear();
+                    OverlayMarkers.Polygons.Clear();
+                    /**/
+
+                    InfoGround plygone = new InfoGround(((InfoGround)m_SelectedInfoPolygon).Points, ((InfoGround)m_SelectedInfoPolygon).Name);
+
+                    plygone.Username = m_Username;
+                    plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
+                    plygone.ToName = m_FormInterfaceVariables.ToName;
+                    plygone.ToType = m_FormInterfaceVariables.ToType;
+                    plygone.Depth = m_FormInterfaceVariables.Depth;
+
+                    /**/
+
+                    Color colore = m_HashColors[m_FormInterfaceVariables.ToType];
+
+                    plygone.IsHitTestVisible = true;
+                    plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
+                    plygone.Stroke = new Pen(Color.Black, 1);
+                    /**/
+
+                    /**/
+                    plygone.IsHitTestVisible = true;
+                    plygone.Username = m_Username;
+                    plygone.ToName = m_FormInterfaceVariables.ToName;
+                    plygone.ToInfoText = m_FormInterfaceVariables.ToInfoText;
+                    plygone.ToType = m_FormInterfaceVariables.ToType;
+                    plygone.Depth = m_FormInterfaceVariables.Depth;
+                    /**/
+
+                    /**/
+                    Console.WriteLine(m_FormInterfaceVariables.ToName);
+                    this.listBoxElements.Items.Add(plygone.ToName);
+
+                    // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
+                    // m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                    GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
+
+                    HashElements[plygone.ToName] = plygone;
+                    gMapa.ReloadMap();
+
+                    //m_SelectedInfoPolygon = plygone;
+                    SaveInfoGroundInDB(plygone);
+
+                    m_IsCreateAir = false;
+                    m_IsCreateGround = false;
+                    //this.button5.BackColor = Color.White;
+                    /**/
+                }
             }
-            else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
+            else if (m_SelectedInfoPolygon.SeasonType == SeasonTypeInfo.Air)
             {
-                /**/
-                DeleteInfoInDB(m_SelectedInfoPolygon);
-                GroundOverlays[m_SelectedInfoPolygon.m_toType].Polygons.Remove(m_SelectedInfoPolygon);
-                //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
-                HashElements.Remove(m_SelectedInfoPolygon.m_toName.ToString());
-                DeleteElemntToListing(m_SelectedInfoPolygon.m_toName.ToString());
-                gedgepoints.Clear();
-                gpolypoints.Clear();
-                OverlayMarkers.Markers.Clear();
-                OverlayMarkers.Polygons.Clear();
-                /**/
 
-                InfoPolygon plygone = new InfoPolygon(m_SelectedInfoPolygon.Points, m_SelectedInfoPolygon.Name);
+                m_FormInterfaceAirVariables = new FormForAirVariables(m_SelectedInfoPolygon, HashElements, true, DB);
+                m_FormInterfaceAirVariables.ShowDialog(this);
 
-                plygone.m_Username = m_Username;
-                plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
-                plygone.m_toName = m_FormInterfaceVariables.ToName;
-                plygone.m_toType = m_FormInterfaceVariables.ToType;
-                plygone.m_Type = m_FormInterfaceVariables.Type;
-                plygone.m_Depth = m_FormInterfaceVariables.Depth;
 
-                /**/
+                //DialogResult dr = m_FormInterfaceVariables.ShowDialog(this);
+                if (!m_FormInterfaceAirVariables.IsStatus)
+                {
+                    Console.WriteLine("Cancel |||| ");
+                    m_FormInterfaceAirVariables.Close();
+                }
+                else //if(m_FormInterfaceVariables.ToName != m_SelectedInfoPolygon.m_toName)
+                {
+                    /**/
+                    DeleteInfoAirInDB(m_SelectedInfoPolygon);
+                    AirOverlays[m_SelectedInfoPolygon.ToType].Markers.Remove((InfoAir)m_SelectedInfoPolygon);
+                    //GroundOverlays[m_SelectedInfoPolygon.m_toType].Markers.Remove(m_SelectedInfoPolygon.m_Marker);
+                    HashElements.Remove(m_SelectedInfoPolygon.ToName.ToString());
+                    DeleteElemntToListing(m_SelectedInfoPolygon.ToName.ToString());
+                    gedgepoints.Clear();
+                    gpolypoints.Clear();
+                    OverlayMarkers.Markers.Clear();
+                    OverlayMarkers.Polygons.Clear();
+                    /**/
 
-                Color colore = m_HashColors[ m_FormInterfaceVariables.ToType ];
+                    InfoAir marker = new InfoAir(((InfoAir)m_SelectedInfoPolygon).Origin,
+                                                ImageMarkers[m_FormInterfaceAirVariables.IconIndex],
+                                                m_FormInterfaceAirVariables.ToName);
 
-                plygone.IsHitTestVisible = true;
-                plygone.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceVariables.Depth, colore));
-                plygone.Stroke = new Pen(Color.Black, 1);
-                /**/
+                    marker.Username = m_Username;
+                    marker.ToInfoText = m_FormInterfaceAirVariables.ToInfoText;
+                    marker.ToName = m_FormInterfaceAirVariables.ToName;
+                    marker.ToType = m_FormInterfaceAirVariables.ToType;
+                    marker.Depth = m_FormInterfaceAirVariables.Depth;
+                    marker.Icon = m_FormInterfaceAirVariables.IconIndex;
 
-                /**/
-                plygone.IsHitTestVisible = true;
-                plygone.m_Username = m_Username;
-                plygone.m_toName = m_FormInterfaceVariables.ToName;
-                plygone.m_toInfoText = m_FormInterfaceVariables.ToInfoText;
-                plygone.m_toType = m_FormInterfaceVariables.ToType;
-                plygone.m_Type = m_FormInterfaceVariables.Type;
-                plygone.m_Depth = m_FormInterfaceVariables.Depth;
-                /**/
+                    marker.ToolTipText = marker.ToName;
 
-                /**/
-                Console.WriteLine(m_FormInterfaceVariables.ToName);
-                this.listBoxElements.Items.Add(plygone.m_toName);
+                    /**
 
-               // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
-               // m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
-                GroundOverlays[m_FormInterfaceVariables.ToType].Polygons.Add(plygone);
+                    Color colore = m_HashColors[m_FormInterfaceAirVariables.ToType];
 
-                HashElements[plygone.m_toName] = plygone;
-                gMapa.ReloadMap();
+                    marker.IsHitTestVisible = true;
+                    marker.Fill = new SolidBrush(Color.FromArgb(m_FormInterfaceAirVariables.Depth, colore));
+                    marker.Stroke = new Pen(Color.Black, 1);
+                    /**/
 
-                //m_SelectedInfoPolygon = plygone;
-                SaveInfoInDB(plygone);
+                    /**/
+                    marker.IsHitTestVisible = true;
+                    marker.Username = m_Username;
+                    marker.ToName = m_FormInterfaceAirVariables.ToName;
+                    marker.ToInfoText = m_FormInterfaceAirVariables.ToInfoText;
+                    marker.ToType = m_FormInterfaceAirVariables.ToType;
+                    marker.Depth = m_FormInterfaceAirVariables.Depth;
+                    marker.Icon = m_FormInterfaceAirVariables.IconIndex;
+                    /**/
 
-                m_IsCreate = false;
-                //this.button5.BackColor = Color.White;
-                /**/
+                    /**/
+                    Console.WriteLine(m_FormInterfaceAirVariables.ToName);
+                    this.listBoxElements.Items.Add(marker.ToName);
+
+                    // plygone.m_Marker = new GMarkerGoogle(plygone.Origin, ImageMarkers[typeIndex]);
+                    // m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                    AirOverlays[m_FormInterfaceAirVariables.ToType].Markers.Add(marker);
+
+                    HashElements[marker.ToName] = marker;
+                    gMapa.ReloadMap();
+
+                    //m_SelectedInfoPolygon = plygone;
+                    SaveInfoAirInDB(marker);
+
+                    m_IsCreateAir = false;
+                    m_IsCreateGround = false;
+                    //this.button5.BackColor = Color.White;
+                    /**/
+
+                }    
             }
-     
-
             this.contextMenuStrip1.Close();
         }
 
@@ -491,12 +661,16 @@ namespace WindowsFormsAppMapa
                 var item = HashElements[listBoxElements.SelectedItem.ToString()];
                 gMapa.Position = item.Origin;
 
-                var ppoly = new InfoPolygon((InfoPolygon)item);
-                ppoly.Fill = new SolidBrush(Color.FromArgb(50, Color.White));
-                OverlayMarkers.Polygons.Clear();
-                OverlayMarkers.Polygons.Add(ppoly);
+                if(item.SeasonType == SeasonTypeInfo.Ground)
+                {
+                  var ppoly = new InfoGround((InfoGround)item);
+                  ppoly.Fill = new SolidBrush(Color.FromArgb(50, Color.White));
+                  OverlayMarkers.Polygons.Clear();
+                  OverlayMarkers.Polygons.Add(ppoly);
+                }
 
-                InfoToOutput(ppoly);
+              
+                InfoToOutput(item);
             }
 
         }
@@ -545,20 +719,30 @@ namespace WindowsFormsAppMapa
 
 
 
-        private void InfoToOutput(InfoPolygon _poly)
+        private void InfoToOutput(InfoBase _poly)
         {
             labelInfo.Text = "     INFORMATION       \n\n" +
                              "----- Username ----- \n " +
-                             _poly.m_Username.ToString() + "\n" +
+                             _poly.Username.ToString() + "\n" +
                              "\n ----- Coords ----- \n " +
                              "X: " + _poly.Origin.Lat.ToString() + "\n" +
                              " Y: " + _poly.Origin.Lng.ToString() + " \n" +
                              "\n ----- Data ----- \n " +
-                             "Name : " + _poly.m_toName.ToString() + " \n" +
-                             "Type : " + _poly.m_toType.ToString() + "\n" +
-                             "Depth : " + _poly.m_Depth.ToString() + "\n" +
+                             "Name : " + _poly.ToName.ToString() + " \n" +
+                             "Type : " + _poly.ToType.ToString() + "\n" +
+                             "Depth : " + _poly.Depth.ToString() + "\n" +
                              "\n ----- Info ----- \n " + 
-                             _poly.m_toInfoText.ToString() + "\n";
+                             _poly.ToInfoText.ToString() + "\n";
+
+            labelInfoOutput.Text = "           INFORMATION :: " +
+                             "| Username: " +
+                             _poly.Username.ToString() + " |   " +
+                             " | Coords: " +
+                             " X: " + _poly.Origin.Lat.ToString() + " , " +
+                             " Y: " + _poly.Origin.Lng.ToString() + " |   " +
+                             "| Name : " + _poly.ToName.ToString() + " |  " +
+                             "| Type : " + _poly.ToType.ToString() + " |  " +
+                             "| Depth : " + _poly.Depth.ToString() + " |  \n\n";
         }
 
   
@@ -574,42 +758,81 @@ namespace WindowsFormsAppMapa
                 {
                     String name = SQL["Name"].ToString();
 
-                    checkedListBox1.Items.Add(name, true);
+                    int type;
+                    Int32.TryParse(SQL["Type"].ToString(), out type);
 
-                    int color;
-                    Int32.TryParse(SQL["Color"].ToString(), out color);
-                    m_HashColors[name] = Color.FromArgb(color);
+                    if(type == 0)
+                    {
+                        // -------------------------------------------- //
+                        customCheckedListBoxGround.Items.Add(name, true);
+                    
+                        int color;
+                        Int32.TryParse(SQL["Color"].ToString(), out color);
+                        m_HashColors[name] = Color.FromArgb(color);
 
-                    System.Console.WriteLine(name);
-                    var layer = new GMapOverlay(name);
-                    GroundOverlays.Add(name, layer);
-                    gMapa.Overlays.Add(layer);
+                        Status statusColor = new Status();
+                        statusColor.background = Color.FromArgb(color);
+                        rowStatusGroundLayers.Add(statusColor);
+
+                        System.Console.WriteLine(name);
+                        var layer = new GMapOverlay(name);
+                        GroundOverlays.Add(name, layer);
+                        gMapa.Overlays.Add(layer);
+                        // -------------------------------------------- //
+                    }
+                    else 
+                    {
+                        customCheckedListBoxAir.Items.Add(name, true);
+
+                        int color;
+                        Int32.TryParse(SQL["Color"].ToString(), out color);
+                        m_HashColors[name] = Color.FromArgb(color);
+
+                        Status statusColor = new Status();
+                        statusColor.background = Color.FromArgb(color);
+                        rowStatusAirLayers.Add(statusColor);
+
+                        System.Console.WriteLine(name);
+                        var layer = new GMapOverlay(name);
+                        AirOverlays.Add(name, layer);
+                        gMapa.Overlays.Add(layer);
+                    }
+                   
                 }
             }
 
         }
 
-        private void DeleteInfoInDB(InfoPolygon _infoPoly)
+        private void DeleteInfoGrountInDB(InfoBase _infoPoly)
         {
             SQLiteCommand CMD = DB.CreateCommand();
-            String name = _infoPoly.m_toName;
+            String name = _infoPoly.ToName;
             CMD.CommandText = "DELETE FROM Information WHERE Name='" + name + "';";
             CMD.ExecuteNonQuery();
             CMD.Dispose();
         }
 
+        private void DeleteInfoAirInDB(InfoBase _infoPoly)
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            String name = _infoPoly.ToName;
+            CMD.CommandText = "DELETE FROM InformationAir WHERE Name='" + name + "';";
+            CMD.ExecuteNonQuery();
+            CMD.Dispose();
+        }
 
-        private void SaveInfoInDB(InfoPolygon _infoPoly)
+
+        private void SaveInfoGroundInDB(InfoGround _infoPoly)
         {
             SQLiteCommand CMD = DB.CreateCommand();
             CMD.CommandText = "insert or replace into Information(Name,Depth,Type,SizePoints,Points,Origin,Username,Info) " +
                               "values(@name,@depth,@type,@sizePoints,@points,@origin,@username,@info)";
 
-            CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoPoly.m_toName;
-            CMD.Parameters.Add("@depth", System.Data.DbType.Int32).Value = _infoPoly.m_Depth;
-            CMD.Parameters.Add("@type", System.Data.DbType.String).Value = _infoPoly.m_toType;
-            CMD.Parameters.Add("@username", System.Data.DbType.String).Value = _infoPoly.m_Username;
-            CMD.Parameters.Add("@info", System.Data.DbType.String).Value = _infoPoly.m_toInfoText;
+            CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoPoly.ToName;
+            CMD.Parameters.Add("@depth", System.Data.DbType.Int32).Value = _infoPoly.Depth;
+            CMD.Parameters.Add("@type", System.Data.DbType.String).Value = _infoPoly.ToType;
+            CMD.Parameters.Add("@username", System.Data.DbType.String).Value = _infoPoly.Username;
+            CMD.Parameters.Add("@info", System.Data.DbType.String).Value = _infoPoly.ToInfoText;
             CMD.Parameters.Add("@sizePoints", System.Data.DbType.Int32).Value = _infoPoly.Points.Count;
 
             String jsonPoints = JsonConvert.SerializeObject(_infoPoly.Points);
@@ -621,7 +844,26 @@ namespace WindowsFormsAppMapa
             CMD.ExecuteNonQuery();
         }
 
-        private void LoadInformationDB()
+        private void SaveInfoAirInDB(InfoAir _infoAir)
+        {
+            SQLiteCommand CMD = DB.CreateCommand();
+            CMD.CommandText = "insert or replace into InformationAir(Name,Depth,Type,Origin,Username,Info,Icon) " +
+                              "values(@name,@depth,@type,@origin,@username,@info,@icon)";
+
+            CMD.Parameters.Add("@name", System.Data.DbType.String).Value = _infoAir.ToName;
+            CMD.Parameters.Add("@depth", System.Data.DbType.Int32).Value = _infoAir.Depth;
+            CMD.Parameters.Add("@type", System.Data.DbType.String).Value = _infoAir.ToType;
+            CMD.Parameters.Add("@username", System.Data.DbType.String).Value = _infoAir.Username;
+            CMD.Parameters.Add("@info", System.Data.DbType.String).Value = _infoAir.ToInfoText;
+            CMD.Parameters.Add("@icon", System.Data.DbType.Int32).Value = _infoAir.Icon;
+
+            String jsonOrigin = JsonConvert.SerializeObject(_infoAir.Origin);
+            CMD.Parameters.Add("@origin", System.Data.DbType.String).Value = jsonOrigin;
+
+            CMD.ExecuteNonQuery();
+        }
+
+        private void LoadInformationGroundDB()
         {
             SQLiteCommand CMD = DB.CreateCommand();
             CMD.CommandText = "select * from Information";
@@ -663,7 +905,7 @@ namespace WindowsFormsAppMapa
                         //HashElements.Remove(name);
                         /**/
 
-                        InfoPolygon plygone = new InfoPolygon(desPoints, name);
+                        InfoGround plygone = new InfoGround(desPoints, name);
 
                         Color colore = m_HashColors[type];
 
@@ -671,20 +913,22 @@ namespace WindowsFormsAppMapa
                         plygone.Stroke = new Pen(Color.Black, 1);
 
                         plygone.IsHitTestVisible = true;
-                        plygone.m_toInfoText = infotext;
-                        plygone.m_Username = username;
-                        plygone.m_toName = name;
-                        plygone.m_toType = type;
-                        plygone.m_Depth = depth;
+                        plygone.ToInfoText = infotext;
+                        plygone.Username = username;
+                        plygone.ToName = name;
+                        plygone.ToType = type;
+                        plygone.Depth = depth;
 
-                        Console.WriteLine(plygone.m_toName);
-                        this.listBoxElements.Items.Add(plygone.m_toName);
+                        
+
+                        Console.WriteLine(plygone.ToName);
+                        this.listBoxElements.Items.Add(plygone.ToName);
 
                         //plygone.m_Marker = new GMarkerGoogle(desOrigin, ImageMarkers[typeIndex]);
                         //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
                         GroundOverlays[type].Polygons.Add(plygone);
 
-                        HashElements[plygone.m_toName] = plygone;
+                        HashElements[plygone.ToName] = plygone;
                         gMapa.ReloadMap();
 
                         /**/
@@ -693,14 +937,68 @@ namespace WindowsFormsAppMapa
             }
         }
 
-        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+
+
+        private void LoadInformationAirdDB()
         {
-            var key = checkedListBox1.Items[e.Index].ToString();
-            if(GroundOverlays.ContainsKey(key))
+            SQLiteCommand CMD = DB.CreateCommand();
+            CMD.CommandText = "select * from InformationAir";
+            SQLiteDataReader SQL = CMD.ExecuteReader();
+            if (SQL.HasRows)
             {
-               GroundOverlays[key].IsVisibile = ValueCheck(e.NewValue);
+                while (SQL.Read())
+                {
+                    String name = SQL["Name"].ToString();
+                    String type = SQL["Type"].ToString();
+                    String username = SQL["Username"].ToString();
+                    String infotext = SQL["Info"].ToString();
+                    int depth = 0;
+                    int icon = 0;
+                    Int32.TryParse(SQL["Depth"].ToString(), out depth);
+                    Int32.TryParse(SQL["Icon"].ToString(), out icon);
+
+
+                    if (!HashElements.ContainsKey(name))
+                    {
+                        //HashElements.Remove(name);
+                        /**/
+
+                        string jsonOrigin = SQL["Origin"].ToString();
+                        PointLatLng desOrigin = JsonConvert.DeserializeObject<PointLatLng>(jsonOrigin);
+                        System.Console.WriteLine(jsonOrigin.ToString());
+
+                        InfoAir marker = new InfoAir(desOrigin, ImageMarkers[icon], name);
+
+                        Color colore = m_HashColors[type];
+
+                        //plygone.Fill = new SolidBrush(Color.FromArgb(depth, colore));
+                        //plygone.Stroke = new Pen(Color.Black, 1);
+
+                        marker.IsHitTestVisible = true;
+                        marker.ToInfoText = infotext;
+                        marker.Username = username;
+                        marker.ToName = name;
+                        marker.ToType = type;
+                        marker.Depth = depth;
+
+                        marker.ToolTipText = marker.ToName;
+
+                        Console.WriteLine(marker.ToName);
+                        this.listBoxElements.Items.Add(marker.ToName);
+
+                        //plygone.m_Marker = new GMarkerGoogle(desOrigin, ImageMarkers[typeIndex]);
+                        //m_OverlaysPoligons[typeIndex].Markers.Add(plygone.m_Marker);
+                        AirOverlays[type].Markers.Add(marker);
+
+                        HashElements[marker.ToName] = marker;
+                        gMapa.ReloadMap();
+
+                        /**/
+                    }
+                }
             }
         }
+
 
         private bool ValueCheck(CheckState Check)
         {
@@ -714,7 +1012,14 @@ namespace WindowsFormsAppMapa
 
         private void groundToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-          m_IsCreate = !m_IsCreate;
+           m_IsCreateGround = !m_IsCreateGround;
+           if (m_IsCreateGround) m_IsCreateAir = false;
+        }
+
+        private void airToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_IsCreateAir = !m_IsCreateAir;
+            if (m_IsCreateAir) m_IsCreateGround = false;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -722,37 +1027,213 @@ namespace WindowsFormsAppMapa
           Close();
         }
 
-        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+   
+
+        private Color customCheckedListBoxGround_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
+        {
+            return rowStatusGroundLayers[e.Index].background;
+        }
+
+        private void customCheckedListBoxGround_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            var key = customCheckedListBoxGround.Items[e.Index].ToString();
+            if (GroundOverlays.ContainsKey(key))
+            {
+                GroundOverlays[key].IsVisibile = ValueCheck(e.NewValue);
+            }
+        }
+
+        private Color customCheckedListBoxAir_GetBackColor(Qodex.CustomCheckedListBox listbox, DrawItemEventArgs e)
+        {
+            return rowStatusAirLayers[e.Index].background;
+        }
+
+        private void customCheckedListBoxAir_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void gMapa_OnMarkerDoubleClick(GMapMarker item, MouseEventArgs e)
+        {
+            InfoToOutput((InfoAir)item);
+        }
+
+        private void customCheckedListBoxAir_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            var key = customCheckedListBoxAir.Items[e.Index].ToString();
+            if (AirOverlays.ContainsKey(key))
+            {
+                AirOverlays[key].IsVisibile = ValueCheck(e.NewValue);
+            }
+        }
+
+        private void gMapa_OnMarkerClick(GMapMarker item, MouseEventArgs e)
+        {
+            if(!m_IsCreateAir && !m_IsCreateGround)
+            {
+              m_SelectedInfoPolygon = (InfoAir)item;
+              if (e.Button == MouseButtons.Right)
+              {
+                if (e.Button == MouseButtons.Right)
+                {
+                    contextMenuStrip1.Show(this, new Point(e.X, e.Y));
+                }
+              }
+            }
+          
+        }
+
+        private void toolStripComboBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+           System.Console.WriteLine( e.ClickedItem.ToString() );
+        }
+
+        private void toolStripComboBox1_TextChanged(object sender, EventArgs e)
+        {
+            string text = e.ToString();
+            System.Console.WriteLine(text);
+        }
+
+        private void toolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            System.Console.WriteLine(toolStripComboBox1.SelectedIndex.ToString());
+
+            if(toolStripComboBox1.SelectedIndex == 0)
+            {
+                for (int i = 0; i < customCheckedListBoxAir.Items.Count; i++)
+                {
+                    customCheckedListBoxAir.SetItemChecked(i, true);
+                }
+
+                for (int i = 0; i < customCheckedListBoxGround.Items.Count; i++)
+                {
+                    customCheckedListBoxGround.SetItemChecked(i, true);
+                }
+            }
+            else if (toolStripComboBox1.SelectedIndex == 1)
+            {
+                for (int i = 0; i < customCheckedListBoxAir.Items.Count; i++)
+                {
+                    customCheckedListBoxAir.SetItemChecked(i, true);
+                }
+
+                for (int i = 0; i < customCheckedListBoxGround.Items.Count; i++)
+                {
+                    customCheckedListBoxGround.SetItemChecked(i, false);
+                }
+
+            }
+            if (toolStripComboBox1.SelectedIndex == 2)
+            {
+                for (int i = 0; i < customCheckedListBoxAir.Items.Count; i++)
+                {
+                    customCheckedListBoxAir.SetItemChecked(i, false);
+                }
+
+                for (int i = 0; i < customCheckedListBoxGround.Items.Count; i++)
+                {
+                    customCheckedListBoxGround.SetItemChecked(i, true);
+                }
+            }
         }
     }
 
 
-
-    public class InfoPolygon : GMapPolygon
+    struct Status
     {
-        public String m_Username;
-        public String m_toInfoText;
-        public String m_toType;
-        public String m_toName;
-        public int m_Type;
-        public int m_Depth;
+        public Color background;
+        public Color foreground;
+    }
 
-       
-        public PointLatLng Origin;
-        // static GMapPolygon();
-        //public GMapMarker m_Marker;
 
-        public InfoPolygon(InfoPolygon _infoPoly) :
+    public enum SeasonTypeInfo
+    {
+        Ground,
+        Air
+    }
+
+    public interface InfoBase
+    {
+        SeasonTypeInfo SeasonType { get; set; }
+
+        PointLatLng Origin { get; set; }
+        string Username { get; set; }
+        string ToInfoText { get; set; }
+        string ToType { get; set; }
+        string ToName { get; set; }
+        int Depth { get; set; }
+        int Icon { get; set; }
+    }
+
+    public class InfoAir : GMarkerGoogle, InfoBase
+    {
+        public SeasonTypeInfo SeasonType { get; set; }
+        public PointLatLng Origin { get; set; }
+        public string Username { get; set; }
+        public string ToInfoText { get; set; }
+        public string ToType { get; set; }
+        public string ToName { get; set; }
+        public int Depth { get; set; }
+        public int Icon { get; set; }
+
+        public InfoAir(PointLatLng _origin, GMarkerGoogleType _type_marker , string name)
+            : base(_origin, _type_marker)
+        {
+            SeasonType = SeasonTypeInfo.Air;
+            ToName = name;
+            Origin = _origin;
+        }
+
+        public InfoAir(PointLatLng _origin, Bitmap _tBitmap, string name)
+          : base(_origin, _tBitmap)
+        {
+            SeasonType = SeasonTypeInfo.Air;
+            ToName = name;
+            Origin = _origin;
+        }
+
+        public InfoAir(InfoAir _infoAir) 
+            : base(_infoAir.Origin , _infoAir.Type)
+        {
+            SeasonType = SeasonTypeInfo.Air;
+            Username = _infoAir.Username;
+            ToInfoText = _infoAir.ToInfoText;
+            ToName = _infoAir.ToName;
+            ToType = _infoAir.ToType;
+            Depth = _infoAir.Depth;
+            Origin = _infoAir.Origin;
+            Icon = _infoAir.Icon;
+        }
+
+    }
+
+    public class InfoGround : GMapPolygon, InfoBase
+    {
+
+        public SeasonTypeInfo SeasonType { get; set; }
+        public PointLatLng Origin { get; set; }
+        public string Username { get; set; }
+        public string ToInfoText { get; set; }
+        public string ToType { get; set; }
+        public string ToName { get; set; }
+        public int Depth { get; set; }
+        public int Icon { get; set; }
+
+        public InfoGround(InfoGround _infoPoly) :
             base(_infoPoly.Points, _infoPoly.Name)
         {
-            m_Username = _infoPoly.m_Username;
-            m_toInfoText = _infoPoly.m_toInfoText;
-            m_toName = _infoPoly.m_toName;
-            m_toType = _infoPoly.m_toType;
-            m_Type = _infoPoly.m_Type;
-            m_Depth = _infoPoly.m_Depth;
+            SeasonType = SeasonTypeInfo.Ground;
+            Username = _infoPoly.Username;
+            ToInfoText = _infoPoly.ToInfoText;
+            ToName = _infoPoly.ToName;
+            ToType = _infoPoly.ToType;
+            Depth = _infoPoly.Depth;
+            Icon = _infoPoly.Icon;
 
             base.LocalPoints.Capacity = Points.Count;
 
@@ -770,10 +1251,11 @@ namespace WindowsFormsAppMapa
             Origin = new PointLatLng(u, v);
         }
 
-        public InfoPolygon(List<PointLatLng> points, string name)
+        public InfoGround(List<PointLatLng> points, string name)
             : base(points, name)
         {
-            m_toName = name;
+            SeasonType = SeasonTypeInfo.Ground;
+            ToName = name;
             base.LocalPoints.Capacity = Points.Count;
 
             double LatCenter = 0;
@@ -789,5 +1271,6 @@ namespace WindowsFormsAppMapa
 
             Origin = new PointLatLng(u, v);
         }
+
     }
 }

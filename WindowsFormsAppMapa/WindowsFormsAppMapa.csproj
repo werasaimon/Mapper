@@ -99,11 +99,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComboBoxTools.cs" />
+    <Compile Include="CustomCheckedListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FormAddUsers.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormAddUsers.Designer.cs">
       <DependentUpon>FormAddUsers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormForAirVariables.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormForAirVariables.Designer.cs">
+      <DependentUpon>FormForAirVariables.cs</DependentUpon>
     </Compile>
     <Compile Include="FormForVariables.cs">
       <SubType>Form</SubType>
@@ -139,6 +149,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FormAddUsers.resx">
       <DependentUpon>FormAddUsers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormForAirVariables.resx">
+      <DependentUpon>FormForAirVariables.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormForVariables.resx">
       <DependentUpon>FormForVariables.cs</DependentUpon>
@@ -186,6 +199,10 @@
     <Content Include="icons\icon_B.png" />
     <Content Include="icons\icon_C.jpg" />
     <Content Include="icons\icon_C.png" />
+    <Content Include="icons\rd1.png" />
+    <Content Include="icons\rd2.png" />
+    <Content Include="icons\rd3.png" />
+    <Content Include="icons\rd4.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
